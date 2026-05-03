@@ -34,6 +34,22 @@ async function downscaleImage(file, maxDim = 800, quality = 0.85) {
   return blob;
 }
 
+function mapDogRow(d, votes = 0) {
+  return {
+    id: d.id,
+    name: d.name,
+    breed: d.breed,
+    age: d.age,
+    owner: d.owner_name,
+    street: d.home_street,
+    quote: d.tagline || "",
+    platform: d.platform || [],
+    joined: d.created_at,
+    portrait: publicPhotoUrl(d.photo_path),
+    votes,
+  };
+}
+
 // === Polaroid ===
 function Polaroid({ src, caption, style, className = "" }) {
   return (
@@ -621,19 +637,7 @@ function App() {
         if (countsRes.error) throw countsRes.error;
         if (voteRes.error) throw voteRes.error;
         const counts = new Map((countsRes.data || []).map(r => [r.dog_id, r.votes]));
-        const merged = (dogsRes.data || []).map(d => ({
-          id: d.id,
-          name: d.name,
-          breed: d.breed,
-          age: d.age,
-          owner: d.owner_name,
-          street: d.home_street,
-          quote: d.tagline || "",
-          platform: d.platform || [],
-          joined: d.created_at,
-          portrait: publicPhotoUrl(d.photo_path),
-          votes: counts.get(d.id) || 0,
-        }));
+        const merged = (dogsRes.data || []).map(d => mapDogRow(d, counts.get(d.id) || 0));
         setContestants(merged);
         setVotedFor(voteRes.data ? voteRes.data.dog_id : null);
       } catch (e) {
@@ -656,6 +660,8 @@ function App() {
           { event: "INSERT", schema: "public", table: "votes" },
           (payload) => {
             // Skip the voter's own INSERT — confirmVote already incremented optimistically.
+          // If sessionUserIdRef is still null (load effect not yet resolved), any phantom
+          // increment here is overwritten when setContestants(merged) fires below.
             if (payload.new.voter_id === sessionUserIdRef.current) return;
             const newDogId = payload.new.dog_id;
             setContestants((list) => list.map(x =>
@@ -663,7 +669,9 @@ function App() {
             ));
           }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+          if (err) console.error("realtime subscribe error:", status, err);
+        });
 
       dogsChannel = window.sb
         .channel("public:dogs")
@@ -674,14 +682,9 @@ function App() {
             setContestants((list) => {
               const wasIn = list.some(c => c.id === row.id);
               if (row.status === "approved" && !wasIn) {
-                return [...list, {
-                  id: row.id, name: row.name, breed: row.breed, age: row.age,
-                  owner: row.owner_name, street: row.home_street,
-                  quote: row.tagline || "", platform: row.platform || [],
-                  joined: row.created_at, portrait: publicPhotoUrl(row.photo_path),
-                  votes: 0,
-                }];
-              }
+              // votes default to 0; the authoritative count comes from a full reload.
+              return [...list, mapDogRow(row, 0)];
+            }
               if (row.status !== "approved" && wasIn) {
                 return list.filter(c => c.id !== row.id);
               }
@@ -689,7 +692,9 @@ function App() {
             });
           }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+          if (err) console.error("realtime subscribe error:", status, err);
+        });
     })();
     return () => {
       if (votesChannel) window.sb.removeChannel(votesChannel);
