@@ -18,4 +18,6 @@
     }
     return data.session;
   })();
+
+  window.sbReady.catch(() => {}); // suppress unhandledrejection; downstream callers handle via try/catch on await
 })();
