@@ -134,7 +134,7 @@ function Hero({ contestants, onJump }) {
 }
 
 // === Foxes section (gallery + sort) ===
-function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
+function FoxesSection({ contestants, votedFor, onVote, onOpen, error }) {
   const [sort, setSort] = useState("votes");
 
   const sorted = useMemo(() => {
@@ -164,7 +164,9 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
       </div>
 
       {!sorted.length && (
-        <p style={{ color: "var(--ink-2)" }}>No candidates approved yet. Check back soon — or nominate your dog below.</p>
+        <p style={{ color: "var(--ink-2)" }}>
+          {error || "No candidates approved yet. Check back soon — or nominate your dog below."}
+        </p>
       )}
       <div className="fox-grid">
           {sorted.map((c) => {
@@ -195,13 +197,15 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
 }
 
 // === Standings (leaderboard) ===
-function Standings({ contestants, onOpen }) {
+function Standings({ contestants, onOpen, error }) {
   if (!contestants.length) {
     return (
       <section className="section" id="standings">
         <span className="eyebrow">Live standings</span>
         <h2 style={{ marginTop: 8, marginBottom: 14 }}>Who's winning?</h2>
-        <p style={{ color: "var(--ink-2)", maxWidth: "60ch" }}>No votes yet. Be the first.</p>
+        <p style={{ color: "var(--ink-2)", maxWidth: "60ch" }}>
+          {error || "No votes yet. Be the first."}
+        </p>
       </section>
     );
   }
@@ -509,6 +513,7 @@ function App() {
   const [contestants, setContestants] = useState([]);
   const [votedFor, setVotedFor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [openId, setOpenId] = useState(null);
   const [pendingVoteId, setPendingVoteId] = useState(null);
   const [toast, setToast] = useState({ msg: "", show: false });
@@ -546,6 +551,7 @@ function App() {
         setVotedFor(voteRes.data ? voteRes.data.dog_id : null);
       } catch (e) {
         console.error("Failed to load contestants:", e);
+        if (!cancelled) setError("Couldn't load candidates — try refreshing the page.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -602,8 +608,8 @@ function App() {
       </nav>
 
       <Hero contestants={contestants} onJump={handleJump} />
-      <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} />
-      <Standings contestants={contestants} onOpen={setOpenId} />
+      <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} error={error} />
+      <Standings contestants={contestants} onOpen={setOpenId} error={error} />
       <SubmitSection onSubmitted={handleSubmitted} />
       <AboutSection />
 
