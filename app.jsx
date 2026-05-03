@@ -1,0 +1,583 @@
+/* global React, ReactDOM, CONTESTANTS, STREETS */
+const { useState, useEffect, useRef, useMemo } = React;
+
+// fixed deadline: midnight at end of May 31, 2026 (i.e. start of June 1) — local time
+const DEADLINE = new Date(2026, 5, 1, 0, 0, 0).getTime();
+
+// === Polaroid ===
+function Polaroid({ src, caption, style, className = "" }) {
+  return (
+    <div className={`polaroid ${className}`} style={style}>
+      <img className="photo" src={src} alt={caption} />
+      {caption ? <div className="caption">{caption}</div> : null}
+    </div>);
+
+}
+
+// === Vote button ===
+function VoteButton({ count, voted, hasVoted, onVote, big = false }) {
+  const [flash, setFlash] = useState(false);
+  const disabled = hasVoted && !voted;
+  const handle = (e) => {
+    e.stopPropagation();
+    if (voted || disabled) return;
+    setFlash(true);
+    onVote();
+    setTimeout(() => setFlash(false), 700);
+  };
+  let label;
+  if (voted) label = "Your pick";else
+  if (disabled) label = "Voting closed";else
+  label = "Vote";
+  return (
+    <button
+      className={`vote-btn ${voted ? "voted" : ""} ${disabled ? "is-disabled" : ""} ${flash ? "flash" : ""} ${big ? "big" : ""}`}
+      onClick={handle}
+      disabled={disabled}
+      aria-disabled={disabled}>
+      <span className="heart">{voted ? "♥" : "♡"}</span>
+      <span>{label}</span>
+      <span style={{ opacity: 0.7, marginLeft: 4 }}>· {count.toLocaleString()}</span>
+    </button>);
+
+}
+
+// === Countdown ===
+function useCountdown(deadline) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  let diff = Math.max(0, deadline - now);
+  const days = Math.floor(diff / 86400000);diff -= days * 86400000;
+  const hours = Math.floor(diff / 3600000);diff -= hours * 3600000;
+  const mins = Math.floor(diff / 60000);diff -= mins * 60000;
+  const secs = Math.floor(diff / 1000);
+  return { days, hours, mins, secs };
+}
+
+function CountdownBanner({ deadline }) {
+  const { days, hours, mins, secs } = useCountdown(deadline);
+  return (
+    <div className="countdown-banner">
+      <span className="pulse"></span>
+      <span className="label">Voting closes midnight, May 31</span>
+      <span className="clock">
+        {days}<span className="unit">d</span>
+        {String(hours).padStart(2, "0")}<span className="unit">h</span>
+        {String(mins).padStart(2, "0")}<span className="unit">m</span>
+        {String(secs).padStart(2, "0")}<span className="unit">s</span>
+      </span>
+    </div>);
+
+}
+
+function CountdownClock({ deadline }) {
+  const { days, hours, mins, secs } = useCountdown(deadline);
+  return (
+    <span className="meta-value clock">
+      {days}<span className="unit">d</span>
+      {String(hours).padStart(2, "0")}<span className="unit">h</span>
+      {String(mins).padStart(2, "0")}<span className="unit">m</span>
+      {String(secs).padStart(2, "0")}<span className="unit">s</span>
+    </span>);
+
+}
+
+// === Hero ===
+function Hero({ contestants, onJump }) {
+  const total = contestants.reduce((s, c) => s + c.votes, 0);
+  return (
+    <section className="hero-mural" id="top">
+      <div className="mural-bg">
+        {/* Placeholder landscape mural — replace src with the actual mural photo */}
+        <img src="mural.png" alt="Welcome to Fox Point mural" />
+        <div className="mural-tint"></div>
+      </div>
+      <div className="mural-content">
+        <span className="eyebrow light">May 1–May 31, 2026 · The first annual election</span>
+        <h1 className="mural-title">
+          Who is the <span className="fox-word">fox of Fox Point?</span>
+        </h1>
+        <p className="lede light">We've called this neighborhood Fox Point for a few hundred years and never had an actual fox to show for it. So we're picking one of our dogs to take the title. Browse the candidates and vote for the one that feels right.
+
+
+
+        </p>
+        <div className="hero-cta">
+          <button className="btn btn-fox" onClick={() => onJump("foxes")}>See the candidates</button>
+          <button className="btn btn-ghost-light" onClick={() => onJump("submit")}>Nominate your dog</button>
+        </div>
+        <div className="hero-meta-row">
+          <div className="meta-card">
+            <span className="meta-label"><span className="pulse"></span>Voting closes May 31</span>
+            <CountdownClock deadline={DEADLINE} />
+          </div>
+          <div className="meta-card">
+            <span className="meta-label">Dogs running</span>
+            <span className="meta-value">{contestants.length}</span>
+          </div>
+          <div className="meta-card">
+            <span className="meta-label">Votes so far</span>
+            <span className="meta-value">{total.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    </section>);
+
+}
+
+// === Foxes section (gallery + sort) ===
+function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
+  const [sort, setSort] = useState("votes");
+
+  const sorted = useMemo(() => {
+    const list = [...contestants];
+    if (sort === "votes") list.sort((a, b) => b.votes - a.votes);else
+    if (sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));else
+    if (sort === "newest") list.sort((a, b) => a.joined < b.joined ? 1 : -1);else
+    if (sort === "underdog") list.sort((a, b) => a.votes - b.votes);
+    return list;
+  }, [contestants, sort]);
+
+  const sortedAll = useMemo(() => [...contestants].sort((a, b) => b.votes - a.votes), [contestants]);
+
+  return (
+    <section className="section" id="foxes">
+      <span className="eyebrow">Twelve candidates</span>
+      <h2 style={{ marginTop: 8, marginBottom: 14 }}>Meet the candidates.</h2>
+      <p style={{ color: "var(--ink-2)", maxWidth: "60ch", marginBottom: 32 }}>Each one nominated by a neighbor. Tap any of them for the full pitch. 
+      </p>
+
+      <div className="filter-bar">
+        <div className="chips">
+          {[["votes", "Most votes"], ["underdog", "Underdogs"], ["name", "A→Z"], ["newest", "Newest"]].map(([v, l]) =>
+          <button key={v} className={`chip ${sort === v ? "active" : ""}`} onClick={() => setSort(v)}>{l}</button>
+          )}
+        </div>
+      </div>
+
+      <div className="fox-grid">
+          {sorted.map((c) => {
+          const rank = sortedAll.findIndex((x) => x.id === c.id) + 1;
+          const rankCls = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
+          return (
+            <article key={c.id} className="fox-card">
+                {rank <= 3 && <div className={`rank-badge ${rankCls}`}>#{rank}</div>}
+                <div className="photo-wrap" onClick={() => onOpen(c.id)}>
+                  <img src={c.portrait} alt={c.name} />
+                  {sort === "newest" && c.joined >= "Mar 16" && <div className="pinned-tag">new!</div>}
+                </div>
+                <div className="body">
+                  <h3 onClick={() => onOpen(c.id)} style={{ cursor: "pointer" }}>{c.name}</h3>
+                  <div className="meta">{c.breed} · {c.street}</div>
+                  <div className="quote">{c.quote}</div>
+                  <div className="footer-row">
+                    <div className="vote-count"><span className="n">{c.votes.toLocaleString()}</span> <span className="l">votes</span></div>
+                    <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} />
+                  </div>
+                </div>
+              </article>);
+
+        })}
+        </div>
+    </section>);
+
+}
+
+// === Standings (leaderboard) ===
+function Standings({ contestants, onOpen }) {
+  const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
+  const max = sorted[0].votes;
+  const total = contestants.reduce((s, c) => s + c.votes, 0);
+  return (
+    <section className="section" id="standings">
+      <span className="eyebrow">Live standings</span>
+      <h2 style={{ marginTop: 8, marginBottom: 14 }}>Who's winning?</h2>
+      <p style={{ color: "var(--ink-2)", maxWidth: "60ch", marginBottom: 32 }}>
+        {total.toLocaleString()} votes cast so far. Updated the moment anyone clicks.
+      </p>
+
+      <div className="leaderboard">
+        {sorted.map((c, i) =>
+        <div key={c.id} className={`lb-row ${i < 3 ? "top" : ""}`}>
+            <div className="rank">{i + 1}</div>
+            <div className="thumb" style={{ backgroundImage: `url("${c.portrait}")` }} onClick={() => onOpen(c.id)}></div>
+            <div className="name-cell">
+              <div className="name" onClick={() => onOpen(c.id)}>{c.name}</div>
+              <div className="meta">{c.breed} · {c.street}</div>
+            </div>
+            <div className="bar-wrap">
+              <div className="bar"><div className="fill" style={{ width: `${c.votes / max * 100}%` }}></div></div>
+              <div className="num">{c.votes.toLocaleString()}</div>
+            </div>
+            <div className="votes-cell">
+              <span className="votes-num">{c.votes.toLocaleString()}</span>
+              <span className="votes-lbl">votes</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>);
+
+}
+
+// === Submit form ===
+function SubmitSection({ onSubmitted }) {
+  const [name, setName] = useState("");
+  const [breed, setBreed] = useState("");
+  const [age, setAge] = useState("");
+  const [owner, setOwner] = useState("");
+  const [email, setEmail] = useState("");
+  const [street, setStreet] = useState("");
+  const [quote, setQuote] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [photoMeta, setPhotoMeta] = useState(null);
+  const [drag, setDrag] = useState(false);
+  const fileRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {setPhoto(e.target.result);setPhotoMeta({ name: file.name, size: (file.size / 1024).toFixed(0) + " KB" });};
+    reader.readAsDataURL(file);
+  };
+  const handleSubmit = (e) => {e.preventDefault();onSubmitted({ name, breed, age, owner, email, street, quote, platform, photo });};
+
+  return (
+    <section className="section" id="submit">
+      <div style={{ textAlign: "center", marginBottom: 30 }}>
+        <span className="eyebrow" style={{ display: "inline-flex" }}>Got a dog?</span>
+        <h2 style={{ marginTop: 12 }}>Nominate your dog.</h2>
+        <p style={{ color: "var(--ink-2)", maxWidth: "50ch", margin: "12px auto 0" }}>
+          One nomination per dog. We'll add yours to the gallery within a day.
+        </p>
+      </div>
+      <form className="submit-card" onSubmit={handleSubmit}>
+        <div className="field">
+          <label>Photo</label>
+          {photo ?
+          <div className="dropzone-preview">
+              <img src={photo} alt="preview" />
+              <div>
+                <div style={{ fontSize: 14, color: "var(--ink-2)" }}>{photoMeta?.name} · {photoMeta?.size}</div>
+                <div className="change" onClick={() => {setPhoto(null);setPhotoMeta(null);fileRef.current.value = "";}}>Choose a different photo</div>
+              </div>
+            </div> :
+
+          <div className={`dropzone ${drag ? "drag" : ""}`}
+          onDragOver={(e) => {e.preventDefault();setDrag(true);}}
+          onDragLeave={() => setDrag(false)}
+          onDrop={(e) => {e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0]);}}
+          onClick={() => fileRef.current.click()}>
+              <div className="icon">↑</div>
+              <div style={{ fontSize: 16, color: "var(--ink-2)" }}>Drop a square photo here, or <span style={{ color: "var(--fox-deep)", textDecoration: "underline" }}>browse</span></div>
+              <div className="help">JPG or PNG · best at 800×800</div>
+            </div>
+          }
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handleFile(e.target.files[0])} />
+        </div>
+
+        <div className="field-row">
+          <div className="field">
+            <label>Your dog's name</label>
+            <input type="text" placeholder="e.g. Sir Reginald Fluffwell" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div className="field">
+            <label>Breed</label>
+            <input type="text" placeholder="e.g. Shiba Inu" value={breed} onChange={(e) => setBreed(e.target.value)} required />
+          </div>
+        </div>
+        <div className="field-row">
+          <div className="field">
+            <label>Age (years)</label>
+            <input type="text" placeholder="4" value={age} onChange={(e) => setAge(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Home street</label>
+            <select value={street} onChange={(e) => setStreet(e.target.value)} required>
+              <option value="">Choose a street…</option>
+              {(window.STREETS || []).map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="field-row">
+          <div className="field">
+            <label>Your name</label>
+            <input type="text" placeholder="e.g. M. Tavares" value={owner} onChange={(e) => setOwner(e.target.value)} required />
+          </div>
+          <div className="field">
+            <label>Email <span className="optional">(optional)</span></label>
+            <input type="email" placeholder="you@foxpoint.org — only if you want updates" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+        </div>
+        <div className="field">
+          <label>One sentence about your dog</label>
+          <input type="text" placeholder="e.g. Looks like a fox. Acts like a small senator." value={quote} onChange={(e) => setQuote(e.target.value)} />
+        </div>
+        <div className="field">
+          <label>What would they do if they won? (one per line)</label>
+          <textarea placeholder={"More benches at India Point\nQuieter leaf blowers\nUniversal puddle access"} value={platform} onChange={(e) => setPlatform(e.target.value)} rows="4" />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+          <button type="submit" className="btn btn-fox">Nominate your dog →</button>
+        </div>
+        <div className="fineprint">By submitting, you certify that your nominee is in fact a dog and lives in Fox Point.</div>
+      </form>
+    </section>);
+
+}
+
+// === About + FAQ ===
+function AboutSection() {
+  return (
+    <section className="section" id="about">
+      <span className="eyebrow">About</span>
+      <h2 style={{ marginTop: 8, marginBottom: 36 }}>A small thing, run by neighbors.</h2>
+      <div className="about-grid">
+        <div>
+          <p>Fox Point sits on the southeast corner of Providence. Named after foxes that, as far as anyone can tell, haven't actually lived here in centuries. It's time to fix that.
+
+
+
+          </p>
+          <p>
+            For one full year, one Fox Point dog will hold the title <strong>Fox of Fox Point</strong>.
+            The role is ceremonial. The duties are flexible. The honor is total.
+          </p>
+          <p>Anyone with a dog and a Fox Point address can nominate them. Anyone at all can vote — once per person, on the honor system. Voting runs through May 2026 and closes at midnight on May 31. The winner is announced here on June 1.
+
+
+
+          </p>
+          <p>
+            <strong>The prize:</strong> a year of recognition on this site, until the next election in May 2027. Plus bragging rights.
+          
+          </p>
+        </div>
+        <div className="faq">
+          <details>
+            <summary>Does my dog need to look like a fox?</summary>
+            <p>Not necessarily, but it'll probably help get more votes.</p>
+          </details>
+          <details>
+            <summary>Can I vote for my own dog?</summary>
+            <p>Of course. We expect nothing less.</p>
+          </details>
+          <details>
+            <summary>What if my dog loses?</summary>
+            <p>They are still your dog. They love you. Give them a treat — they have no idea what an election is. Please consider running again next year.</p>
+          </details>
+          <details>
+            <summary>Who's running this?</summary>
+            <p>Just a guy in Fox Point. My dog looks like a fox, and I want to call him the Fox of Fox Point — but I can't just hand him the title. It has to be official. I'd love for him to win. I also believe in fair elections.</p>
+          </details>
+
+          <details>
+            <summary>How do you prevent fraud?</summary>
+            <p>Honor system, mostly. Plus light browser fingerprinting, and the conviction that anyone who would cheat at this is going through something.</p>
+          </details>
+        </div>
+      </div>
+    </section>);}
+
+// === Profile modal ===
+function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen }) {
+  if (!contestant) return null;
+  const c = contestant;
+  const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
+  const idx = sorted.findIndex((x) => x.id === c.id);
+  const rank = idx + 1;
+  const prev = sorted[(idx - 1 + sorted.length) % sorted.length];
+  const next = sorted[(idx + 1) % sorted.length];
+
+  useEffect(() => {
+    const handler = (e) => {if (e.key === "Escape") onClose();};
+    document.addEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {document.removeEventListener("keydown", handler);document.body.style.overflow = "";};
+  }, []);
+
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <button className="close" onClick={onClose} aria-label="Close">×</button>
+        <div className="modal-grid">
+          <div>
+            <div className="photo-big">
+              <img src={c.portrait} alt={c.name} />
+            </div>
+          </div>
+          <div>
+            <span className="eyebrow">#{rank} · {c.street}</span>
+            <h2 style={{ marginTop: 8 }}>{c.name}</h2>
+            <div className="modal-meta">{c.breed} · age {c.age} · with {c.owner}</div>
+            <div className="quote-big">"{c.quote}"</div>
+            <div className="stats">
+              <div className="cell"><div className="num">#{rank}</div><div className="lbl">Standing</div></div>
+              <div className="cell"><div className="num">{c.votes.toLocaleString()}</div><div className="lbl">Votes</div></div>
+              <div className="cell"><div className="num">{c.age}</div><div className="lbl">Years old</div></div>
+            </div>
+            <h3 className="platform-h">If elected, they'll:</h3>
+            <ul className="platform">
+              {(c.platform || []).map((p, i) => <li key={i}>{p}</li>)}
+            </ul>
+            <div className="vote-row">
+              <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} big />
+              <span style={{ color: "var(--ink-3)", fontSize: 13 }}>One vote per person. Choose carefully.</span>
+            </div>
+            <div className="nav-row">
+              <button className="btn btn-ghost btn-sm" onClick={() => onOpen(prev.id)}>← {prev.name.split(" ")[0]}</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => onOpen(next.id)}>{next.name.split(" ")[0]} →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>);
+
+}
+
+// === Toast ===
+function Toast({ msg, show }) {
+  return (
+    <div className={`toast ${show ? "show" : ""}`}>
+      <span className="check">♥</span>
+      <span>{msg}</span>
+    </div>);
+
+}
+
+// === Vote confirmation modal ===
+function VoteConfirmModal({ contestant, onConfirm, onCancel }) {
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onCancel();
+      if (e.key === "Enter") onConfirm();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onConfirm, onCancel]);
+
+  return (
+    <div className="modal-bg" onClick={onCancel}>
+      <div className="modal confirm-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="confirm-photo">
+          <img src={contestant.portrait} alt={contestant.name} />
+        </div>
+        <div className="confirm-body">
+          <div className="confirm-eyebrow">Confirm your vote</div>
+          <h2>Vote for {contestant.name.split(",")[0]}?</h2>
+          <p className="confirm-warn">
+            <strong>Heads up:</strong> you only get <em>one</em> vote in this election. Once you cast it,
+            you can't change your mind, vote for another dog, or undo it. Make it count.
+          </p>
+          <div className="confirm-actions">
+            <button className="btn btn-ghost" onClick={onCancel}>Not yet — let me look around</button>
+            <button className="btn btn-fox" onClick={onConfirm}>
+              <span style={{ marginRight: 6 }}>♥</span>
+              Yes, this is my dog
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>);
+
+}
+
+// === App ===
+function App() {
+  const [contestants, setContestants] = useState(() => {
+    try {
+      const overrides = JSON.parse(localStorage.getItem("ffp.contestants") || "{}");
+      return CONTESTANTS.map((c) => overrides[c.id] != null ? { ...c, votes: overrides[c.id] } : c);
+    } catch (e) {return CONTESTANTS;}
+  });
+  const [votedFor, setVotedFor] = useState(() => {
+    try {return localStorage.getItem("ffp.votedFor") || null;}
+    catch (e) {return null;}
+  });
+  const [openId, setOpenId] = useState(null);
+  const [pendingVoteId, setPendingVoteId] = useState(null);
+  const [toast, setToast] = useState({ msg: "", show: false });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const o = {};contestants.forEach((c) => {o[c.id] = c.votes;});
+    localStorage.setItem("ffp.contestants", JSON.stringify(o));
+  }, [contestants]);
+  useEffect(() => {
+    if (votedFor) localStorage.setItem("ffp.votedFor", votedFor);else
+    localStorage.removeItem("ffp.votedFor");
+  }, [votedFor]);
+
+  const showToast = (msg) => {
+    setToast({ msg, show: true });
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
+  };
+
+  const handleVote = (id) => {
+    if (votedFor) return;
+    setPendingVoteId(id);
+  };
+  const confirmVote = () => {
+    const id = pendingVoteId;
+    if (!id || votedFor) {setPendingVoteId(null);return;}
+    const c = contestants.find((x) => x.id === id);
+    setContestants((list) => list.map((x) => x.id === id ? { ...x, votes: x.votes + 1 } : x));
+    setVotedFor(id);
+    setPendingVoteId(null);
+    showToast(`Your vote is in for ${c.name.split(" ")[0]}.`);
+  };
+  const cancelVote = () => setPendingVoteId(null);
+  const handleJump = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const handleSubmitted = (data) => {
+    setSubmitted(true);
+    showToast(`Thanks! ${data.name || "Your dog"} is in.`);
+    setTimeout(() => setSubmitted(false), 2000);
+  };
+
+  const open = openId ? contestants.find((c) => c.id === openId) : null;
+
+  return (
+    <div>
+      <nav className="nav">
+        <a href="#top" className="logo" onClick={(e) => {e.preventDefault();handleJump("top");}}>
+          <span className="dot"></span>
+          <span>Who is the Fox of Fox Point?</span>
+        </a>
+        <div className="nav-links">
+          <a href="#foxes" onClick={(e) => {e.preventDefault();handleJump("foxes");}}>Candidates</a>
+          <a href="#standings" onClick={(e) => {e.preventDefault();handleJump("standings");}}>Standings</a>
+          <a href="#submit" onClick={(e) => {e.preventDefault();handleJump("submit");}}>Submit</a>
+          <a href="#about" onClick={(e) => {e.preventDefault();handleJump("about");}}>About</a>
+        </div>
+
+      </nav>
+
+      <Hero contestants={contestants} onJump={handleJump} />
+      <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} />
+      <Standings contestants={contestants} onOpen={setOpenId} />
+      <SubmitSection onSubmitted={handleSubmitted} />
+      <AboutSection />
+
+      <footer className="footer">
+        <div className="footer-mark">Who is the Fox of Fox Point?</div>
+        <div>Made by neighbors, for neighbors · Providence, RI · 2026</div>
+        <div style={{ marginTop: 8, fontSize: 13 }}>Questions? Yell out a window on Wickenden.</div>
+      </footer>
+
+      {open && <FoxModal contestant={open} contestants={contestants} votedFor={votedFor} onVote={handleVote} onClose={() => setOpenId(null)} onOpen={setOpenId} />}
+      {pendingVoteId && <VoteConfirmModal contestant={contestants.find((c) => c.id === pendingVoteId)} onConfirm={confirmVote} onCancel={cancelVote} />}
+      <Toast msg={toast.msg} show={toast.show} />
+    </div>);
+
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
