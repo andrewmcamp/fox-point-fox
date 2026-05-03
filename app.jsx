@@ -603,12 +603,14 @@ function App() {
   const [pendingVoteId, setPendingVoteId] = useState(null);
   const [toast, setToast] = useState({ msg: "", show: false });
   const [submitted, setSubmitted] = useState(false);
+  const sessionUserIdRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const session = await window.sbReady;
+        sessionUserIdRef.current = session.user.id;
         const [dogsRes, countsRes, voteRes] = await Promise.all([
           window.sb.from("dogs").select("*").eq("status", "approved"),
           window.sb.from("dog_vote_counts").select("*"),
@@ -642,6 +644,57 @@ function App() {
       }
     })();
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let votesChannel, dogsChannel;
+    (async () => {
+      await window.sbReady;
+      votesChannel = window.sb
+        .channel("public:votes")
+        .on("postgres_changes",
+          { event: "INSERT", schema: "public", table: "votes" },
+          (payload) => {
+            // Skip the voter's own INSERT — confirmVote already incremented optimistically.
+            if (payload.new.voter_id === sessionUserIdRef.current) return;
+            const newDogId = payload.new.dog_id;
+            setContestants((list) => list.map(x =>
+              x.id === newDogId ? { ...x, votes: x.votes + 1 } : x
+            ));
+          }
+        )
+        .subscribe();
+
+      dogsChannel = window.sb
+        .channel("public:dogs")
+        .on("postgres_changes",
+          { event: "UPDATE", schema: "public", table: "dogs" },
+          (payload) => {
+            const row = payload.new;
+            setContestants((list) => {
+              const wasIn = list.some(c => c.id === row.id);
+              if (row.status === "approved" && !wasIn) {
+                return [...list, {
+                  id: row.id, name: row.name, breed: row.breed, age: row.age,
+                  owner: row.owner_name, street: row.home_street,
+                  quote: row.tagline || "", platform: row.platform || [],
+                  joined: row.created_at, portrait: publicPhotoUrl(row.photo_path),
+                  votes: 0,
+                }];
+              }
+              if (row.status !== "approved" && wasIn) {
+                return list.filter(c => c.id !== row.id);
+              }
+              return list;
+            });
+          }
+        )
+        .subscribe();
+    })();
+    return () => {
+      if (votesChannel) window.sb.removeChannel(votesChannel);
+      if (dogsChannel) window.sb.removeChannel(dogsChannel);
+    };
   }, []);
 
   const showToast = (msg) => {
