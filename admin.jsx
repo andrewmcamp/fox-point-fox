@@ -52,6 +52,89 @@ function SentNotice({ email }) {
   );
 }
 
+function PendingList() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const photoUrl = (path) =>
+    path ? window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl : "";
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await window.sb
+        .from("dogs").select("*").eq("status", "pending")
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) setError(error.message);
+      else setRows(data || []);
+      setLoading(false);
+    })();
+    const channel = window.sb
+      .channel("admin:pending")
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "dogs" },
+        (payload) => {
+          if (payload.new.status === "pending") {
+            setRows((r) => [...r, payload.new]);
+          }
+        }
+      )
+      .subscribe();
+    return () => { cancelled = true; window.sb.removeChannel(channel); };
+  }, []);
+
+  const setStatus = async (id, status) => {
+    const prev = rows;
+    setRows((r) => r.filter(x => x.id !== id)); // optimistic
+    const { error } = await window.sb.from("dogs").update({ status }).eq("id", id);
+    if (error) {
+      setRows(prev);
+      alert("Update failed: " + error.message);
+    }
+  };
+
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div style={{ color: "#a52a1a" }}>Error: {error}</div>;
+  if (!rows.length) return <p style={{ color: "#666" }}>No pending nominations.</p>;
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      {rows.map(d => (
+        <div key={d.id} style={{
+          display: "grid", gridTemplateColumns: "120px 1fr auto", gap: 16,
+          padding: 16, border: "1px solid #ddd", borderRadius: 8, alignItems: "center"
+        }}>
+          <img src={photoUrl(d.photo_path)} alt={d.name}
+               style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 6 }} />
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>{d.name}</div>
+            <div style={{ color: "#666" }}>{d.breed} · {d.home_street} · age {d.age ?? "?"}</div>
+            <div style={{ color: "#666", fontSize: 14 }}>Owner: {d.owner_name}{d.email ? ` · ${d.email}` : ""}</div>
+            {d.tagline && <div style={{ marginTop: 8, fontStyle: "italic" }}>"{d.tagline}"</div>}
+            {d.platform && d.platform.length > 0 && (
+              <ul style={{ marginTop: 8 }}>
+                {d.platform.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
+            )}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button onClick={() => setStatus(d.id, "approved")}
+                    style={{ padding: "8px 14px", background: "#2a7a3a", color: "white", border: 0, borderRadius: 4 }}>
+              Approve
+            </button>
+            <button onClick={() => setStatus(d.id, "rejected")}
+                    style={{ padding: "8px 14px", background: "#a52a1a", color: "white", border: 0, borderRadius: 4 }}>
+              Reject
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AdminApp() {
   const [session, setSession] = useState(null);
   const [sentTo, setSentTo] = useState(null);
@@ -85,7 +168,7 @@ function AdminApp() {
         <h1>Pending nominations</h1>
         <button onClick={() => window.sb.auth.signOut()}>Sign out</button>
       </div>
-      <p style={{ color: "#666" }}>(Nominations list lands in Task 13.)</p>
+      <PendingList />
     </div>
   );
 }
