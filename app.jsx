@@ -660,8 +660,8 @@ function App() {
           { event: "INSERT", schema: "public", table: "votes" },
           (payload) => {
             // Skip the voter's own INSERT — confirmVote already incremented optimistically.
-          // If sessionUserIdRef is still null (load effect not yet resolved), any phantom
-          // increment here is overwritten when setContestants(merged) fires below.
+            // If sessionUserIdRef is still null (load effect not yet resolved), any phantom
+            // increment here is overwritten when setContestants(merged) fires below.
             if (payload.new.voter_id === sessionUserIdRef.current) return;
             const newDogId = payload.new.dog_id;
             setContestants((list) => list.map(x =>
@@ -682,9 +682,9 @@ function App() {
             setContestants((list) => {
               const wasIn = list.some(c => c.id === row.id);
               if (row.status === "approved" && !wasIn) {
-              // votes default to 0; the authoritative count comes from a full reload.
-              return [...list, mapDogRow(row, 0)];
-            }
+                // votes default to 0; the authoritative count comes from a full reload.
+                return [...list, mapDogRow(row, 0)];
+              }
               if (row.status !== "approved" && wasIn) {
                 return list.filter(c => c.id !== row.id);
               }
