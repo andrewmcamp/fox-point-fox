@@ -569,14 +569,39 @@ function App() {
     if (votedFor) return;
     setPendingVoteId(id);
   };
-  const confirmVote = () => {
+  const confirmVote = async () => {
     const id = pendingVoteId;
-    if (!id || votedFor) {setPendingVoteId(null);return;}
-    const c = contestants.find((x) => x.id === id);
-    setContestants((list) => list.map((x) => x.id === id ? { ...x, votes: x.votes + 1 } : x));
-    setVotedFor(id);
     setPendingVoteId(null);
-    showToast(`Your vote is in for ${c.name.split(" ")[0]}.`);
+    if (!id || votedFor) return;
+    const c = contestants.find((x) => x.id === id);
+    try {
+      const session = await window.sbReady;
+      const { error } = await window.sb.from("votes").insert({
+        dog_id: id,
+        voter_id: session.user.id,
+      });
+      if (error) {
+        if (error.code === "23505") {
+          // already voted on a previous session/tab — refetch and reconcile
+          const { data } = await window.sb
+            .from("votes").select("dog_id").eq("voter_id", session.user.id).maybeSingle();
+          if (data) setVotedFor(data.dog_id);
+          showToast("Looks like you've already voted.");
+          return;
+        }
+        // RLS rejection or anything else
+        console.error("Vote insert failed:", error);
+        showToast("That candidate isn't accepting votes anymore.");
+        return;
+      }
+      // Optimistic local count bump; realtime will reconcile if needed.
+      setContestants((list) => list.map((x) => x.id === id ? { ...x, votes: x.votes + 1 } : x));
+      setVotedFor(id);
+      showToast(`Your vote is in for ${c.name.split(" ")[0]}.`);
+    } catch (e) {
+      console.error("Vote failed:", e);
+      showToast("Something went wrong. Try again?");
+    }
   };
   const cancelVote = () => setPendingVoteId(null);
   const handleJump = (id) => {
