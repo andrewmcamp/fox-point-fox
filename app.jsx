@@ -594,10 +594,13 @@ function App() {
         showToast("That candidate isn't accepting votes anymore.");
         return;
       }
-      // Optimistic local count bump; realtime will reconcile if needed.
+      // Optimistic local count bump. Task 10's votes-INSERT handler MUST skip
+      // events where voter_id === session.user.id, or the voter sees their own
+      // vote counted twice locally.
       setContestants((list) => list.map((x) => x.id === id ? { ...x, votes: x.votes + 1 } : x));
       setVotedFor(id);
-      showToast(`Your vote is in for ${c.name.split(" ")[0]}.`);
+      const firstName = c?.name?.split(" ")[0] ?? "your candidate";
+      showToast(`Your vote is in for ${firstName}.`);
     } catch (e) {
       console.error("Vote failed:", e);
       showToast("Something went wrong. Try again?");
