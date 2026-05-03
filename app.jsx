@@ -9,6 +9,31 @@ function publicPhotoUrl(path) {
   return window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl;
 }
 
+async function downscaleImage(file, maxDim = 800, quality = 0.85) {
+  const dataUrl = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = dataUrl;
+  });
+  const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+  const blob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", quality));
+  if (!blob) throw new Error("Could not encode image");
+  return blob;
+}
+
 // === Polaroid ===
 function Polaroid({ src, caption, style, className = "" }) {
   return (
@@ -258,14 +283,67 @@ function SubmitSection({ onSubmitted }) {
   const [photoMeta, setPhotoMeta] = useState(null);
   const [drag, setDrag] = useState(false);
   const fileRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [file, setFile] = useState(null);
 
-  const handleFile = (file) => {
-    if (!file || !file.type.startsWith("image/")) return;
+  const handleFile = (f) => {
+    setError("");
+    if (!f || !f.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+    if (f.size > 10 * 1024 * 1024) {
+      setError("That image is over 10MB — please pick a smaller one.");
+      return;
+    }
+    setFile(f);
     const reader = new FileReader();
-    reader.onload = (e) => {setPhoto(e.target.result);setPhotoMeta({ name: file.name, size: (file.size / 1024).toFixed(0) + " KB" });};
-    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      setPhoto(e.target.result);
+      setPhotoMeta({ name: f.name, size: (f.size / 1024).toFixed(0) + " KB" });
+    };
+    reader.readAsDataURL(f);
   };
-  const handleSubmit = (e) => {e.preventDefault();onSubmitted({ name, breed, age, owner, email, street, quote, platform, photo });};
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!file) {
+      setError("A photo is required.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const blob = await downscaleImage(file).catch(() => file); // fall back to original on encode error
+      const path = `${crypto.randomUUID()}.jpg`;
+      const up = await window.sb.storage.from("nominations").upload(path, blob, {
+        contentType: blob.type || "image/jpeg",
+        upsert: false,
+      });
+      if (up.error) throw up.error;
+      const ageNum = age === "" ? null : Number(age);
+      const platformList = platform.split("\n").map(s => s.trim()).filter(Boolean);
+      const ins = await window.sb.from("dogs").insert({
+        name, breed, age: Number.isFinite(ageNum) ? ageNum : null,
+        owner_name: owner, email: email || null,
+        home_street: street, tagline: quote || null,
+        platform: platformList, photo_path: path, status: "pending",
+      });
+      if (ins.error) throw ins.error;
+      onSubmitted({ name });
+      // reset form
+      setName(""); setBreed(""); setAge(""); setOwner(""); setEmail("");
+      setStreet(""); setQuote(""); setPlatform("");
+      setPhoto(null); setPhotoMeta(null); setFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+    } catch (e2) {
+      console.error("Submit failed:", e2);
+      setError("Sorry — submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section className="section" id="submit">
@@ -343,8 +421,11 @@ function SubmitSection({ onSubmitted }) {
           <textarea placeholder={"More benches at India Point\nQuieter leaf blowers\nUniversal puddle access"} value={platform} onChange={(e) => setPlatform(e.target.value)} rows="4" />
         </div>
 
+        {error && <div style={{ color: "#a52a1a", marginTop: 12, textAlign: "center" }}>{error}</div>}
         <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
-          <button type="submit" className="btn btn-fox">Nominate your dog →</button>
+          <button type="submit" className="btn btn-fox" disabled={submitting}>
+            {submitting ? "Submitting…" : "Nominate your dog →"}
+          </button>
         </div>
         <div className="fineprint">By submitting, you certify that your nominee is in fact a dog and lives in Fox Point.</div>
       </form>
