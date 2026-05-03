@@ -14,7 +14,7 @@ function LoginCard({ onSent }) {
     try {
       const { error } = await window.sb.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: window.location.href },
+        options: { emailRedirectTo: window.location.origin + window.location.pathname },
       });
       if (error) throw error;
       onSent(email);
@@ -64,7 +64,10 @@ function AdminApp() {
       setSession(session);
       setLoading(false);
     })();
-    const { data: sub } = window.sb.auth.onAuthStateChange((_evt, s) => setSession(s));
+    const { data: sub } = window.sb.auth.onAuthStateChange((_evt, s) => {
+      setSession(s);
+      setLoading(false);
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
