@@ -1,11 +1,11 @@
-/* global React, ReactDOM, CONTESTANTS, STREETS */
+/* global React, ReactDOM */
 const { useState, useEffect, useRef, useMemo } = React;
 
 // fixed deadline: midnight at end of May 31, 2026 (i.e. start of June 1) — local time
 const DEADLINE = new Date(2026, 5, 1, 0, 0, 0).getTime();
 
 function publicPhotoUrl(path) {
-  if (!path) return "";
+  if (!path) return null;
   return window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl;
 }
 
@@ -150,7 +150,7 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
 
   return (
     <section className="section" id="foxes">
-      <span className="eyebrow">Twelve candidates</span>
+      <span className="eyebrow">{contestants.length === 1 ? "One candidate" : `${contestants.length} candidates`}</span>
       <h2 style={{ marginTop: 8, marginBottom: 14 }}>Meet the candidates.</h2>
       <p style={{ color: "var(--ink-2)", maxWidth: "60ch", marginBottom: 32 }}>Each one nominated by a neighbor. Tap any of them for the full pitch. 
       </p>
@@ -527,6 +527,7 @@ function App() {
         if (cancelled) return;
         if (dogsRes.error) throw dogsRes.error;
         if (countsRes.error) throw countsRes.error;
+        if (voteRes.error) throw voteRes.error;
         const counts = new Map((countsRes.data || []).map(r => [r.dog_id, r.votes]));
         const merged = (dogsRes.data || []).map(d => ({
           id: d.id,
