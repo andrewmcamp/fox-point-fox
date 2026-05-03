@@ -63,9 +63,9 @@ function Polaroid({ src, caption, style, className = "" }) {
 }
 
 // === Vote button ===
-function VoteButton({ count, voted, hasVoted, onVote, big = false }) {
+function VoteButton({ count, voted, hasVoted, onVote, big = false, votingOpen = true }) {
   const [flash, setFlash] = useState(false);
-  const disabled = hasVoted && !voted;
+  const disabled = !votingOpen || (hasVoted && !voted);
   const handle = (e) => {
     e.stopPropagation();
     if (voted || disabled) return;
@@ -75,6 +75,7 @@ function VoteButton({ count, voted, hasVoted, onVote, big = false }) {
   };
   let label;
   if (voted) label = "Your pick";else
+  if (!votingOpen) label = "Opens May 7";else
   if (disabled) label = "Already voted";else
   label = "Vote";
   return (
@@ -134,7 +135,7 @@ function CountdownClock({ deadline }) {
 }
 
 // === Hero ===
-function Hero({ contestants, onJump }) {
+function Hero({ contestants, onJump, votingOpen }) {
   const total = contestants.reduce((s, c) => s + c.votes, 0);
   return (
     <section className="hero-mural" id="top">
@@ -159,8 +160,10 @@ function Hero({ contestants, onJump }) {
         </div>
         <div className="hero-meta-row">
           <div className="meta-card">
-            <span className="meta-label"><span className="pulse"></span>Voting begins May 7</span>
-            <CountdownClock deadline={OPENS} />
+            <span className="meta-label"><span className="pulse"></span>{votingOpen ? "Voting" : "Voting begins May 7"}</span>
+            {votingOpen
+              ? <span className="meta-value">Open!</span>
+              : <CountdownClock deadline={OPENS} />}
           </div>
           <div className="meta-card">
             <span className="meta-label"><span className="pulse"></span>Voting closes May 31</span>
@@ -181,7 +184,7 @@ function Hero({ contestants, onJump }) {
 }
 
 // === Foxes section (gallery + sort) ===
-function FoxesSection({ contestants, votedFor, onVote, onOpen, error }) {
+function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen }) {
   const [sort, setSort] = useState("votes");
 
   const sorted = useMemo(() => {
@@ -232,7 +235,7 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error }) {
                   <div className="quote">{c.quote}</div>
                   <div className="footer-row">
                     <div className="vote-count"><span className="n">{c.votes.toLocaleString()}</span> <span className="l">votes</span></div>
-                    <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} />
+                    <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} votingOpen={votingOpen} />
                   </div>
                 </div>
               </article>);
@@ -513,7 +516,7 @@ function AboutSection() {
     </section>);}
 
 // === Profile modal ===
-function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen }) {
+function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen, votingOpen }) {
   if (!contestant) return null;
   const c = contestant;
   const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
@@ -554,7 +557,7 @@ function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen }
               {(c.platform || []).map((p, i) => <li key={i}>{p}</li>)}
             </ul>
             <div className="vote-row">
-              <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} big />
+              <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} votingOpen={votingOpen} big />
               <span style={{ color: "var(--ink-3)", fontSize: 13 }}>One vote per person. Choose carefully.</span>
             </div>
             <div className="nav-row">
@@ -626,6 +629,15 @@ function App() {
   const [toast, setToast] = useState({ msg: "", show: false });
   const [submitted, setSubmitted] = useState(false);
   const sessionUserIdRef = useRef(null);
+  const [votingOpen, setVotingOpen] = useState(() => Date.now() >= OPENS);
+
+  useEffect(() => {
+    if (votingOpen) return;
+    const ms = OPENS - Date.now();
+    if (ms <= 0) { setVotingOpen(true); return; }
+    const id = setTimeout(() => setVotingOpen(true), ms);
+    return () => clearTimeout(id);
+  }, [votingOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -715,7 +727,7 @@ function App() {
   };
 
   const handleVote = (id) => {
-    if (votedFor) return;
+    if (votedFor || !votingOpen) return;
     setPendingVoteId(id);
   };
   const confirmVote = async () => {
@@ -784,8 +796,8 @@ function App() {
 
       </nav>
 
-      <Hero contestants={contestants} onJump={handleJump} />
-      <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} error={error} />
+      <Hero contestants={contestants} onJump={handleJump} votingOpen={votingOpen} />
+      <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} error={error} votingOpen={votingOpen} />
       <Standings contestants={contestants} onOpen={setOpenId} error={error} />
       <SubmitSection onSubmitted={handleSubmitted} />
       <AboutSection />
@@ -796,7 +808,7 @@ function App() {
         <div style={{ marginTop: 8, fontSize: 13 }}>Questions? Yell out a window on Wickenden.</div>
       </footer>
 
-      {open && <FoxModal contestant={open} contestants={contestants} votedFor={votedFor} onVote={handleVote} onClose={() => setOpenId(null)} onOpen={setOpenId} />}
+      {open && <FoxModal contestant={open} contestants={contestants} votedFor={votedFor} onVote={handleVote} onClose={() => setOpenId(null)} onOpen={setOpenId} votingOpen={votingOpen} />}
       {pendingVoteId && <VoteConfirmModal contestant={contestants.find((c) => c.id === pendingVoteId)} onConfirm={confirmVote} onCancel={cancelVote} />}
       <Toast msg={toast.msg} show={toast.show} />
     </div>);
