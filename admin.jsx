@@ -56,6 +56,7 @@ function PendingList() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [inFlight, setInFlight] = useState(new Set());
 
   const photoUrl = (path) =>
     path ? window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl : "";
@@ -67,8 +68,16 @@ function PendingList() {
         .from("dogs").select("*").eq("status", "pending")
         .order("created_at", { ascending: true });
       if (cancelled) return;
-      if (error) setError(error.message);
-      else setRows(data || []);
+      if (error) {
+        setError(error.message);
+      } else {
+        setRows((current) => {
+          const fetched = data || [];
+          const fetchedIds = new Set(fetched.map(r => r.id));
+          const realtimeOnly = current.filter(r => !fetchedIds.has(r.id));
+          return [...fetched, ...realtimeOnly];
+        });
+      }
       setLoading(false);
     })();
     const channel = window.sb
@@ -77,22 +86,40 @@ function PendingList() {
         { event: "INSERT", schema: "public", table: "dogs" },
         (payload) => {
           if (payload.new.status === "pending") {
-            setRows((r) => [...r, payload.new]);
+            setRows((r) => r.some(x => x.id === payload.new.id) ? r : [...r, payload.new]);
           }
         }
       )
-      .subscribe();
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "dogs" },
+        (payload) => {
+          if (payload.new.status !== "pending") {
+            setRows((r) => r.filter(x => x.id !== payload.new.id));
+          }
+        }
+      )
+      .subscribe((status, err) => {
+        if (err) console.error("admin pending channel error:", status, err);
+      });
     return () => { cancelled = true; window.sb.removeChannel(channel); };
   }, []);
 
   const setStatus = async (id, status) => {
-    const prev = rows;
+    if (inFlight.has(id)) return;
+    setInFlight((s) => { const n = new Set(s); n.add(id); return n; });
+    const removedRow = rows.find(x => x.id === id);
     setRows((r) => r.filter(x => x.id !== id)); // optimistic
     const { error } = await window.sb.from("dogs").update({ status }).eq("id", id);
     if (error) {
-      setRows(prev);
+      setRows((r) => {
+        if (!removedRow || r.some(x => x.id === id)) return r;
+        return [...r, removedRow].sort((a, b) =>
+          (a.created_at || "").localeCompare(b.created_at || "")
+        );
+      });
       alert("Update failed: " + error.message);
     }
+    setInFlight((s) => { const n = new Set(s); n.delete(id); return n; });
   };
 
   if (loading) return <div>Loading…</div>;
@@ -106,8 +133,10 @@ function PendingList() {
           display: "grid", gridTemplateColumns: "120px 1fr auto", gap: 16,
           padding: 16, border: "1px solid #ddd", borderRadius: 8, alignItems: "center"
         }}>
-          <img src={photoUrl(d.photo_path)} alt={d.name}
-               style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 6 }} />
+          {photoUrl(d.photo_path)
+            ? <img src={photoUrl(d.photo_path)} alt={d.name}
+                   style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 6 }} />
+            : <div style={{ width: 120, height: 120, background: "#eee", borderRadius: 6 }} />}
           <div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>{d.name}</div>
             <div style={{ color: "#666" }}>{d.breed} · {d.home_street} · age {d.age ?? "?"}</div>
@@ -120,12 +149,12 @@ function PendingList() {
             )}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <button onClick={() => setStatus(d.id, "approved")}
-                    style={{ padding: "8px 14px", background: "#2a7a3a", color: "white", border: 0, borderRadius: 4 }}>
+            <button onClick={() => setStatus(d.id, "approved")} disabled={inFlight.has(d.id)}
+                    style={{ padding: "8px 14px", background: "#2a7a3a", color: "white", border: 0, borderRadius: 4, opacity: inFlight.has(d.id) ? 0.6 : 1 }}>
               Approve
             </button>
-            <button onClick={() => setStatus(d.id, "rejected")}
-                    style={{ padding: "8px 14px", background: "#a52a1a", color: "white", border: 0, borderRadius: 4 }}>
+            <button onClick={() => { if (window.confirm(`Reject nomination for ${d.name}?`)) setStatus(d.id, "rejected"); }} disabled={inFlight.has(d.id)}
+                    style={{ padding: "8px 14px", background: "#a52a1a", color: "white", border: 0, borderRadius: 4, opacity: inFlight.has(d.id) ? 0.6 : 1 }}>
               Reject
             </button>
           </div>
