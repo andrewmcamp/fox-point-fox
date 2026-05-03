@@ -308,6 +308,7 @@ function SubmitSection({ onSubmitted }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setError("");
     if (!file) {
       setError("A photo is required.");
@@ -315,7 +316,10 @@ function SubmitSection({ onSubmitted }) {
     }
     setSubmitting(true);
     try {
-      const blob = await downscaleImage(file).catch(() => file); // fall back to original on encode error
+      const blob = await downscaleImage(file).catch((err) => {
+        console.warn("downscaleImage failed, uploading original:", err);
+        return file;
+      });
       const path = `${crypto.randomUUID()}.jpg`;
       const up = await window.sb.storage.from("nominations").upload(path, blob, {
         contentType: blob.type || "image/jpeg",
@@ -392,7 +396,7 @@ function SubmitSection({ onSubmitted }) {
         <div className="field-row">
           <div className="field">
             <label>Age (years)</label>
-            <input type="text" placeholder="4" value={age} onChange={(e) => setAge(e.target.value)} />
+            <input type="number" min="0" max="30" step="1" placeholder="4" value={age} onChange={(e) => setAge(e.target.value)} />
           </div>
           <div className="field">
             <label>Home street</label>
