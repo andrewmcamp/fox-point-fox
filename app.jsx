@@ -4,6 +4,11 @@ const { useState, useEffect, useRef, useMemo } = React;
 // fixed deadline: midnight at end of May 31, 2026 (i.e. start of June 1) — local time
 const DEADLINE = new Date(2026, 5, 1, 0, 0, 0).getTime();
 
+function publicPhotoUrl(path) {
+  if (!path) return "";
+  return window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl;
+}
+
 // === Polaroid ===
 function Polaroid({ src, caption, style, className = "" }) {
   return (
@@ -158,6 +163,9 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
         </div>
       </div>
 
+      {!sorted.length && (
+        <p style={{ color: "var(--ink-2)" }}>No candidates approved yet. Check back soon — or nominate your dog below.</p>
+      )}
       <div className="fox-grid">
           {sorted.map((c) => {
           const rank = sortedAll.findIndex((x) => x.id === c.id) + 1;
@@ -188,8 +196,17 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen }) {
 
 // === Standings (leaderboard) ===
 function Standings({ contestants, onOpen }) {
+  if (!contestants.length) {
+    return (
+      <section className="section" id="standings">
+        <span className="eyebrow">Live standings</span>
+        <h2 style={{ marginTop: 8, marginBottom: 14 }}>Who's winning?</h2>
+        <p style={{ color: "var(--ink-2)", maxWidth: "60ch" }}>No votes yet. Be the first.</p>
+      </section>
+    );
+  }
   const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
-  const max = sorted[0].votes;
+  const max = sorted[0].votes || 1;
   const total = contestants.reduce((s, c) => s + c.votes, 0);
   return (
     <section className="section" id="standings">
@@ -489,29 +506,51 @@ function VoteConfirmModal({ contestant, onConfirm, onCancel }) {
 
 // === App ===
 function App() {
-  const [contestants, setContestants] = useState(() => {
-    try {
-      const overrides = JSON.parse(localStorage.getItem("ffp.contestants") || "{}");
-      return CONTESTANTS.map((c) => overrides[c.id] != null ? { ...c, votes: overrides[c.id] } : c);
-    } catch (e) {return CONTESTANTS;}
-  });
-  const [votedFor, setVotedFor] = useState(() => {
-    try {return localStorage.getItem("ffp.votedFor") || null;}
-    catch (e) {return null;}
-  });
+  const [contestants, setContestants] = useState([]);
+  const [votedFor, setVotedFor] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
   const [pendingVoteId, setPendingVoteId] = useState(null);
   const [toast, setToast] = useState({ msg: "", show: false });
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    const o = {};contestants.forEach((c) => {o[c.id] = c.votes;});
-    localStorage.setItem("ffp.contestants", JSON.stringify(o));
-  }, [contestants]);
-  useEffect(() => {
-    if (votedFor) localStorage.setItem("ffp.votedFor", votedFor);else
-    localStorage.removeItem("ffp.votedFor");
-  }, [votedFor]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const session = await window.sbReady;
+        const [dogsRes, countsRes, voteRes] = await Promise.all([
+          window.sb.from("dogs").select("*").eq("status", "approved"),
+          window.sb.from("dog_vote_counts").select("*"),
+          window.sb.from("votes").select("dog_id").eq("voter_id", session.user.id).maybeSingle(),
+        ]);
+        if (cancelled) return;
+        if (dogsRes.error) throw dogsRes.error;
+        if (countsRes.error) throw countsRes.error;
+        const counts = new Map((countsRes.data || []).map(r => [r.dog_id, r.votes]));
+        const merged = (dogsRes.data || []).map(d => ({
+          id: d.id,
+          name: d.name,
+          breed: d.breed,
+          age: d.age,
+          owner: d.owner_name,
+          street: d.home_street,
+          quote: d.tagline || "",
+          platform: d.platform || [],
+          joined: d.created_at,
+          portrait: publicPhotoUrl(d.photo_path),
+          votes: counts.get(d.id) || 0,
+        }));
+        setContestants(merged);
+        setVotedFor(voteRes.data ? voteRes.data.dog_id : null);
+      } catch (e) {
+        console.error("Failed to load contestants:", e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const showToast = (msg) => {
     setToast({ msg, show: true });
