@@ -209,7 +209,6 @@ h3 { font-size: 22px; line-height: 1.2; }
   border-radius: 16px;
   flex: 1 1 0; min-width: 200px;
 }
-.meta-card:first-child { flex: 2 1 280px; }
 .meta-label {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--serif); font-size: 13px;
@@ -236,7 +235,6 @@ h3 { font-size: 22px; line-height: 1.2; }
 @media (max-width: 720px) {
   .hero-meta-row { gap: 10px; }
   .meta-card { padding: 14px 18px; min-width: 0; flex: 1 1 140px; }
-  .meta-card:first-child { flex: 1 1 100%; }
   .meta-value { font-size: 26px; }
   .meta-value.clock { font-size: 22px; }
 }

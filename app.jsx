@@ -3,6 +3,8 @@ const { useState, useEffect, useRef, useMemo } = React;
 
 // fixed deadline: midnight at end of May 31, 2026 (i.e. start of June 1) — local time
 const DEADLINE = new Date(2026, 5, 1, 0, 0, 0).getTime();
+// voting opens at midnight on May 7, 2026 — local time
+const OPENS = new Date(2026, 4, 7, 0, 0, 0).getTime();
 
 function publicPhotoUrl(path) {
   if (!path) return null;
@@ -73,7 +75,7 @@ function VoteButton({ count, voted, hasVoted, onVote, big = false }) {
   };
   let label;
   if (voted) label = "Your pick";else
-  if (disabled) label = "Voting closed";else
+  if (disabled) label = "Already voted";else
   label = "Vote";
   return (
     <button
@@ -138,7 +140,7 @@ function Hero({ contestants, onJump }) {
     <section className="hero-mural" id="top">
       <div className="mural-bg">
         {/* Placeholder landscape mural — replace src with the actual mural photo */}
-        <img src="mural.png" alt="Welcome to Fox Point mural" />
+        <img src="mural.jpg" alt="Welcome to Fox Point mural" />
         <div className="mural-tint"></div>
       </div>
       <div className="mural-content">
@@ -156,6 +158,10 @@ function Hero({ contestants, onJump }) {
           <button className="btn btn-ghost-light" onClick={() => onJump("submit")}>Nominate your dog</button>
         </div>
         <div className="hero-meta-row">
+          <div className="meta-card">
+            <span className="meta-label"><span className="pulse"></span>Voting begins May 7</span>
+            <CountdownClock deadline={OPENS} />
+          </div>
           <div className="meta-card">
             <span className="meta-label"><span className="pulse"></span>Voting closes May 31</span>
             <CountdownClock deadline={DEADLINE} />
