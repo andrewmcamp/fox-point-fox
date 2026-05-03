@@ -246,54 +246,6 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen
 
 }
 
-// === Standings (leaderboard) ===
-function Standings({ contestants, onOpen, error }) {
-  if (!contestants.length) {
-    return (
-      <section className="section" id="standings">
-        <span className="eyebrow">Live standings</span>
-        <h2 style={{ marginTop: 8, marginBottom: 14 }}>Who's winning?</h2>
-        <p style={{ color: "var(--ink-2)", maxWidth: "60ch" }}>
-          {error || "No votes yet. Be the first."}
-        </p>
-      </section>
-    );
-  }
-  const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
-  const max = sorted[0].votes || 1;
-  const total = contestants.reduce((s, c) => s + c.votes, 0);
-  return (
-    <section className="section" id="standings">
-      <span className="eyebrow">Live standings</span>
-      <h2 style={{ marginTop: 8, marginBottom: 14 }}>Who's winning?</h2>
-      <p style={{ color: "var(--ink-2)", maxWidth: "60ch", marginBottom: 32 }}>
-        {total.toLocaleString()} votes cast so far. Updated the moment anyone clicks.
-      </p>
-
-      <div className="leaderboard">
-        {sorted.map((c, i) =>
-        <div key={c.id} className={`lb-row ${i < 3 ? "top" : ""}`}>
-            <div className="rank">{i + 1}</div>
-            <div className="thumb" style={{ backgroundImage: `url("${c.portrait}")` }} onClick={() => onOpen(c.id)}></div>
-            <div className="name-cell">
-              <div className="name" onClick={() => onOpen(c.id)}>{c.name}</div>
-              <div className="meta">{c.breed} · {c.street}</div>
-            </div>
-            <div className="bar-wrap">
-              <div className="bar"><div className="fill" style={{ width: `${c.votes / max * 100}%` }}></div></div>
-              <div className="num">{c.votes.toLocaleString()}</div>
-            </div>
-            <div className="votes-cell">
-              <span className="votes-num">{c.votes.toLocaleString()}</span>
-              <span className="votes-lbl">votes</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </section>);
-
-}
-
 // === Submit form ===
 function SubmitSection({ onSubmitted }) {
   const [name, setName] = useState("");
@@ -789,7 +741,6 @@ function App() {
         </a>
         <div className="nav-links">
           <a href="#foxes" onClick={(e) => {e.preventDefault();handleJump("foxes");}}>Candidates</a>
-          <a href="#standings" onClick={(e) => {e.preventDefault();handleJump("standings");}}>Standings</a>
           <a href="#submit" onClick={(e) => {e.preventDefault();handleJump("submit");}}>Submit</a>
           <a href="#about" onClick={(e) => {e.preventDefault();handleJump("about");}}>About</a>
         </div>
@@ -798,7 +749,6 @@ function App() {
 
       <Hero contestants={contestants} onJump={handleJump} votingOpen={votingOpen} />
       <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} error={error} votingOpen={votingOpen} />
-      <Standings contestants={contestants} onOpen={setOpenId} error={error} />
       <SubmitSection onSubmitted={handleSubmitted} />
       <AboutSection />
 
