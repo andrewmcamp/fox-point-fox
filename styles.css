@@ -26,10 +26,6 @@
   --fox-deep:   #a8471a;
   --fox-soft:   #f0b380;
 
-  /* darker variants for use on translucent-white overlays */
-  --accent-on-light: #6b1638;   /* deep magenta — readable on light surfaces */
-  --ink-on-light:    #4a3340;   /* secondary text on light surfaces */
-
   --serif: "Source Serif 4", Georgia, serif;
   --display: "Fraunces", "Source Serif 4", Georgia, serif;
   --hand: "Caveat", "Bradley Hand", cursive;
@@ -555,17 +551,17 @@ h3 { font-size: 22px; line-height: 1.2; }
 .dropzone {
   border: 2px dashed var(--rule-strong); border-radius: 16px;
   padding: 28px; text-align: center;
-  background: rgba(255,255,255,0.88);
+  background: transparent;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   transition: all 0.15s;
 }
-.dropzone:hover, .dropzone.drag { border-color: var(--magenta); background: rgba(247, 210, 220, 0.92); }
+.dropzone:hover, .dropzone.drag { border-color: var(--magenta); background: rgba(216, 58, 120, 0.08); }
 .dropzone .icon {
   width: 48px; height: 48px; border-radius: 50%;
-  background: var(--pink-soft); display: flex; align-items: center; justify-content: center;
-  font-size: 24px; color: var(--accent-on-light);
+  background: var(--surface-3); display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--magenta-2);
 }
-.dropzone .help { font-size: 13px; color: var(--ink-on-light); }
+.dropzone .help { font-size: 13px; color: var(--ink-3); }
 .dropzone-preview { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; }
 .dropzone-preview img { width: 96px; height: 96px; border-radius: 14px; object-fit: cover; }
 .dropzone-preview .change { font-size: 13px; color: var(--magenta-2); cursor: pointer; text-decoration: underline; margin-top: 4px; }
@@ -655,15 +651,15 @@ h3 { font-size: 22px; line-height: 1.2; }
 .modal .stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   margin: 22px 0;
-  background: rgba(255,255,255,0.88);
+  background: transparent;
   border: 1px solid var(--rule-strong);
   border-radius: 14px;
   overflow: hidden;
 }
-.modal .stats .cell { padding: 14px; text-align: center; border-right: 1px solid var(--rule); }
+.modal .stats .cell { padding: 14px; text-align: center; border-right: 1px solid var(--rule-strong); }
 .modal .stats .cell:last-child { border-right: none; }
-.modal .stats .num { font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--accent-on-light); line-height: 1; }
-.modal .stats .lbl { font-size: 12px; color: var(--ink-on-light); margin-top: 4px; }
+.modal .stats .num { font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--magenta-2); line-height: 1; }
+.modal .stats .lbl { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
 .modal h3.platform-h { font-size: 18px; margin: 18px 0 10px; }
 .modal .platform { display: flex; flex-direction: column; gap: 8px; list-style: none; }
 .modal .platform li {
