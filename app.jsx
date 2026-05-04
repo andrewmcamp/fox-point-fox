@@ -435,7 +435,7 @@ function AboutSection() {
           </p>
           <p>
             <strong>The prize:</strong> a year of recognition on this site, until the next election in May 2027. Plus bragging rights.
-          
+
           </p>
         </div>
         <div className="faq">
@@ -445,7 +445,7 @@ function AboutSection() {
           </details>
           <details>
             <summary>Can I vote for my own dog?</summary>
-            <p>Of course. We expect nothing less.</p>
+            <p>Of course. I'd expect nothing less.</p>
           </details>
           <details>
             <summary>What if my dog loses?</summary>
