@@ -374,10 +374,10 @@ function SubmitSection({ onSubmitted }) {
           </div>
           <div className="field">
             <label>Home street</label>
-            <select value={street} onChange={(e) => setStreet(e.target.value)} required>
-              <option value="">Choose a street…</option>
-              {(window.STREETS || []).map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <input type="text" list="ffp-streets" placeholder="Choose or type a street…" value={street} onChange={(e) => setStreet(e.target.value)} required />
+            <datalist id="ffp-streets">
+              {(window.STREETS || []).map((s) => <option key={s} value={s} />)}
+            </datalist>
           </div>
         </div>
         <div className="field-row">

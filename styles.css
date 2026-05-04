@@ -534,7 +534,7 @@ h3 { font-size: 22px; line-height: 1.2; }
   font-weight: 400; color: var(--ink-3); margin-left: 4px;
   font-style: italic;
 }
-.field input[type="text"], .field input[type="email"], .field textarea, .field select {
+.field input[type="text"], .field input[type="email"], .field input[type="number"], .field textarea, .field select {
   width: 100%; font-family: var(--serif); font-size: 15px;
   padding: 11px 14px; border-radius: 12px;
   background: var(--surface-2);
