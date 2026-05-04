@@ -387,7 +387,7 @@ function SubmitSection({ onSubmitted }) {
           </div>
           <div className="field">
             <label>Email <span className="optional">(optional)</span></label>
-            <input type="email" placeholder="you@foxpoint.org — only if you want updates" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type="email" placeholder="if you want the results emailed to you" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
         </div>
         <div className="field">
@@ -738,7 +738,7 @@ function App() {
         </a>
         <div className="nav-links">
           <a href="#foxes" onClick={(e) => {e.preventDefault();handleJump("foxes");}}>Candidates</a>
-          <a href="#submit" onClick={(e) => {e.preventDefault();handleJump("submit");}}>Submit</a>
+          <a href="#submit" onClick={(e) => {e.preventDefault();handleJump("submit");}}>Nominate</a>
           <a href="#about" onClick={(e) => {e.preventDefault();handleJump("about");}}>About</a>
         </div>
 
@@ -751,7 +751,6 @@ function App() {
 
       <footer className="footer">
         <div className="footer-mark">Who is the Fox of Fox Point?</div>
-        <div>Made by neighbors, for neighbors · Providence, RI · 2026</div>
         <div style={{ marginTop: 8, fontSize: 13 }}>Questions? Yell out a window on Wickenden.</div>
       </footer>
 
