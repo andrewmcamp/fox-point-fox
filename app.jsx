@@ -95,19 +95,18 @@ function VoteButton({ count, voted, hasVoted, onVote, big = false, votingOpen = 
 function useCountdown(deadline) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(id);
   }, []);
   let diff = Math.max(0, deadline - now);
   const days = Math.floor(diff / 86400000);diff -= days * 86400000;
   const hours = Math.floor(diff / 3600000);diff -= hours * 3600000;
-  const mins = Math.floor(diff / 60000);diff -= mins * 60000;
-  const secs = Math.floor(diff / 1000);
-  return { days, hours, mins, secs };
+  const mins = Math.floor(diff / 60000);
+  return { days, hours, mins };
 }
 
 function CountdownBanner({ deadline }) {
-  const { days, hours, mins, secs } = useCountdown(deadline);
+  const { days, hours, mins } = useCountdown(deadline);
   return (
     <div className="countdown-banner">
       <span className="pulse"></span>
@@ -116,20 +115,18 @@ function CountdownBanner({ deadline }) {
         {days}<span className="unit">d</span>
         {String(hours).padStart(2, "0")}<span className="unit">h</span>
         {String(mins).padStart(2, "0")}<span className="unit">m</span>
-        {String(secs).padStart(2, "0")}<span className="unit">s</span>
       </span>
     </div>);
 
 }
 
 function CountdownClock({ deadline }) {
-  const { days, hours, mins, secs } = useCountdown(deadline);
+  const { days, hours, mins } = useCountdown(deadline);
   return (
     <span className="meta-value clock">
       {days}<span className="unit">d</span>
       {String(hours).padStart(2, "0")}<span className="unit">h</span>
       {String(mins).padStart(2, "0")}<span className="unit">m</span>
-      {String(secs).padStart(2, "0")}<span className="unit">s</span>
     </span>);
 
 }
