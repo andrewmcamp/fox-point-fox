@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Stylized fox-head silhouette matching the .nav .logo .dot in styles.css -->
+  <path d="M5 3 L13 11 L8 13 Z" fill="#ec5b95"/>
+  <path d="M27 3 L19 11 L24 13 Z" fill="#ec5b95"/>
+  <circle cx="16" cy="19" r="11" fill="#ec5b95"/>
+</svg>
