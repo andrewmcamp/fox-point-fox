@@ -220,14 +220,20 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen
           const rank = sortedAll.findIndex((x) => x.id === c.id) + 1;
           const rankCls = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
           return (
-            <article key={c.id} className="fox-card">
+            <article
+              key={c.id}
+              className="fox-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => onOpen(c.id)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(c.id); } }}>
                 {rank <= 3 && <div className={`rank-badge ${rankCls}`}>#{rank}</div>}
-                <div className="photo-wrap" onClick={() => onOpen(c.id)}>
+                <div className="photo-wrap">
                   <img src={c.portrait} alt={c.name} />
                   {sort === "newest" && c.joined >= "Mar 16" && <div className="pinned-tag">new!</div>}
                 </div>
                 <div className="body">
-                  <h3 onClick={() => onOpen(c.id)} style={{ cursor: "pointer" }}>{c.name}</h3>
+                  <h3>{c.name}</h3>
                   <div className="meta">{c.breed} · {c.street}</div>
                   <div className="quote">{c.quote}</div>
                   <div className="footer-row">

@@ -396,9 +396,11 @@ h3 { font-size: 22px; line-height: 1.2; }
   border: 1px solid var(--rule-strong);
   border-radius: 20px;
   box-shadow: var(--shadow-1);
+  cursor: pointer;
   transition: transform 0.22s ease, box-shadow 0.22s, border-color 0.22s, background 0.22s;
 }
 .fox-card:hover { transform: translateY(-4px); background: var(--surface-2); box-shadow: var(--shadow-2); border-color: var(--magenta-2); }
+.fox-card:focus-visible { outline: 2px solid var(--magenta-2); outline-offset: 2px; }
 .fox-card .rank-badge {
   position: absolute; top: -10px; left: 14px; z-index: 2;
   display: inline-flex; align-items: center; gap: 6px;
