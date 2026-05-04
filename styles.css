@@ -546,6 +546,10 @@ h3 { font-size: 22px; line-height: 1.2; }
   outline: none; border-color: var(--magenta); background: var(--surface-3);
 }
 .field textarea { resize: vertical; min-height: 90px; font-family: var(--serif); }
+/* Hide native number-input spinners — min/max still enforced, arrow keys still work. */
+.field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
 .dropzone {
