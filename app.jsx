@@ -3,8 +3,8 @@ const { useState, useEffect, useRef, useMemo } = React;
 
 // fixed deadline: midnight at end of May 31, 2026 (i.e. start of June 1) — local time
 const DEADLINE = new Date(2026, 5, 1, 0, 0, 0).getTime();
-// voting opens at midnight on May 7, 2026 — local time
-const OPENS = new Date(2026, 4, 7, 0, 0, 0).getTime();
+// voting opens at midnight at the start of May 8, 2026 — local time
+const OPENS = new Date(2026, 4, 8, 0, 0, 0).getTime();
 
 function publicPhotoUrl(path) {
   if (!path) return null;
@@ -75,7 +75,7 @@ function VoteButton({ count, voted, hasVoted, onVote, big = false, votingOpen = 
   };
   let label;
   if (voted) label = "Your pick";else
-  if (!votingOpen) label = "Opens May 7";else
+  if (!votingOpen) label = "Opens May 8";else
   if (disabled) label = "Already voted";else
   label = "Vote";
   return (
@@ -142,7 +142,7 @@ function Hero({ contestants, onJump, votingOpen }) {
         <div className="mural-tint"></div>
       </div>
       <div className="mural-content">
-        <span className="eyebrow light">May 1–May 31, 2026 · The first annual election</span>
+        <span className="eyebrow light">May 8–May 31, 2026 · The first annual election</span>
         <h1 className="mural-title">
           Who is the <span className="fox-word">fox of Fox Point?</span>
         </h1>
@@ -157,7 +157,7 @@ function Hero({ contestants, onJump, votingOpen }) {
         </div>
         <div className="hero-meta-row">
           <div className="meta-card">
-            <span className="meta-label"><span className="pulse"></span>{votingOpen ? "Voting" : "Voting begins May 7"}</span>
+            <span className="meta-label"><span className="pulse"></span>{votingOpen ? "Voting" : "Voting begins May 8"}</span>
             {votingOpen
               ? <span className="meta-value">Open!</span>
               : <CountdownClock deadline={OPENS} />}
@@ -428,7 +428,7 @@ function AboutSection() {
             For one full year, one Fox Point dog will hold the title <strong>Fox of Fox Point</strong>.
             The role is ceremonial. The duties are flexible. The honor is total.
           </p>
-          <p>Anyone with a dog and a Fox Point address can nominate them. Anyone at all can vote — once per person, on the honor system. Voting runs through May 2026 and closes at midnight on May 31. The winner is announced here on June 1.
+          <p>Anyone with a dog and a Fox Point address can nominate them. Anyone at all can vote — once per person, on the honor system. Voting starts on May 8th and closes at midnight on May 31. The winner is announced here on June 1.
 
 
 
