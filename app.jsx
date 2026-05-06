@@ -193,8 +193,6 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen
     return list;
   }, [contestants, sort]);
 
-  const sortedAll = useMemo(() => [...contestants].sort((a, b) => b.votes - a.votes), [contestants]);
-
   return (
     <section className="section" id="foxes">
       <span className="eyebrow">{contestants.length === 1 ? "One candidate" : `${contestants.length} candidates`}</span>
@@ -217,7 +215,7 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen
       )}
       <div className="fox-grid">
           {sorted.map((c) => {
-          const rank = sortedAll.findIndex((x) => x.id === c.id) + 1;
+          const rank = contestants.filter((x) => x.votes > c.votes).length + 1;
           const rankCls = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
           return (
             <article
@@ -227,7 +225,7 @@ function FoxesSection({ contestants, votedFor, onVote, onOpen, error, votingOpen
               tabIndex={0}
               onClick={() => onOpen(c.id)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(c.id); } }}>
-                {rank <= 3 && <div className={`rank-badge ${rankCls}`}>#{rank}</div>}
+                {votingOpen && rank <= 3 && <div className={`rank-badge ${rankCls}`}>#{rank}</div>}
                 <div className="photo-wrap">
                   <img src={c.portrait} alt={c.name} />
                   {sort === "newest" && c.joined >= "Mar 16" && <div className="pinned-tag">new!</div>}
@@ -422,7 +420,7 @@ function AboutSection() {
   return (
     <section className="section" id="about">
       <span className="eyebrow">About</span>
-      <h2 style={{ marginTop: 8, marginBottom: 36 }}>A small thing, run by neighbors.</h2>
+      <h2 style={{ marginTop: 8, marginBottom: 36 }}>What is this anyways?</h2>
       <div className="about-grid">
         <div>
           <p>Fox Point sits on the southeast corner of Providence. Named after foxes that, as far as anyone can tell, haven't actually lived here in centuries. It's time to fix that.
@@ -476,7 +474,7 @@ function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen, 
   const c = contestant;
   const sorted = [...contestants].sort((a, b) => b.votes - a.votes);
   const idx = sorted.findIndex((x) => x.id === c.id);
-  const rank = idx + 1;
+  const rank = contestants.filter((x) => x.votes > c.votes).length + 1;
   const prev = sorted[(idx - 1 + sorted.length) % sorted.length];
   const next = sorted[(idx + 1) % sorted.length];
 
@@ -498,12 +496,12 @@ function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen, 
             </div>
           </div>
           <div>
-            <span className="eyebrow">#{rank} · {c.street}</span>
+            <span className="eyebrow">{votingOpen ? `#${rank} · ${c.street}` : c.street}</span>
             <h2 style={{ marginTop: 8 }}>{c.name}</h2>
             <div className="modal-meta">{c.breed} · age {c.age} · with {c.owner}</div>
             <div className="quote-big">"{c.quote}"</div>
             <div className="stats">
-              <div className="cell"><div className="num">#{rank}</div><div className="lbl">Standing</div></div>
+              {votingOpen && <div className="cell"><div className="num">#{rank}</div><div className="lbl">Standing</div></div>}
               <div className="cell"><div className="num">{c.votes.toLocaleString()}</div><div className="lbl">Votes</div></div>
               <div className="cell"><div className="num">{c.age}</div><div className="lbl">Years old</div></div>
             </div>
@@ -675,10 +673,10 @@ function App() {
     };
   }, []);
 
-  const showToast = (msg) => {
+  const showToast = (msg, duration = 2400) => {
     setToast({ msg, show: true });
     clearTimeout(window._tt);
-    window._tt = setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
+    window._tt = setTimeout(() => setToast((t) => ({ ...t, show: false })), duration);
   };
 
   const handleVote = (id) => {
@@ -729,7 +727,10 @@ function App() {
   };
   const handleSubmitted = (data) => {
     setSubmitted(true);
-    showToast(`Thanks! ${data.name || "Your dog"} is in.`);
+    showToast(
+      <span>Thanks! {data.name || "Your dog"} should be posted within 24 hours. Questions? <a href="mailto:admin@foxpointfox.com">Email me</a>.</span>,
+      8000
+    );
     setTimeout(() => setSubmitted(false), 2000);
   };
 
@@ -757,7 +758,7 @@ function App() {
 
       <footer className="footer">
         <div className="footer-mark">Who is the Fox of Fox Point?</div>
-        <div style={{ marginTop: 8, fontSize: 13 }}>Questions? Yell out a window on Wickenden.</div>
+        <div style={{ marginTop: 8, fontSize: 13 }}>Questions? Yell out a window on Wickenden or <a href="mailto:admin@foxpointfox.com">email me</a>.</div>
       </footer>
 
       {open && <FoxModal contestant={open} contestants={contestants} votedFor={votedFor} onVote={handleVote} onClose={() => setOpenId(null)} onOpen={setOpenId} votingOpen={votingOpen} />}
