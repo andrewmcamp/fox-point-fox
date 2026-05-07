@@ -62,6 +62,45 @@ function Polaroid({ src, caption, style, className = "" }) {
 
 }
 
+// === Share button ===
+function ShareButton({ contestant }) {
+  const [copied, setCopied] = useState(false);
+  const handle = async (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}${window.location.pathname}?fox=${contestant.id}`;
+    const shareData = {
+      title: `${contestant.name} for Fox of Fox Point`,
+      text: `Meet ${contestant.name}, candidate for Fox of Fox Point.`,
+      url,
+    };
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+        // fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // clipboard unavailable — silent
+    }
+  };
+  return (
+    <button
+      className={`share-btn ${copied ? "copied" : ""}`}
+      onClick={handle}
+      aria-label={`Share ${contestant.name}`}>
+      <span className="share-icon" aria-hidden="true">{copied ? "✓" : "↗"}</span>
+      <span>{copied ? "Copied!" : "Share"}</span>
+    </button>);
+
+}
+
 // === Vote button ===
 function VoteButton({ count, voted, hasVoted, onVote, big = false, votingOpen = true }) {
   const [flash, setFlash] = useState(false);
@@ -510,8 +549,11 @@ function FoxModal({ contestant, contestants, votedFor, onVote, onClose, onOpen, 
               {(c.platform || []).map((p, i) => <li key={i}>{p}</li>)}
             </ul>
             <div className="vote-row">
-              <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} votingOpen={votingOpen} big />
-              <span style={{ color: "var(--ink-3)", fontSize: 13 }}>One vote per person. Choose carefully.</span>
+              <span className="vote-fineprint">One vote per person. Choose carefully.</span>
+              <div className="vote-row-buttons">
+                <VoteButton count={c.votes} voted={votedFor === c.id} hasVoted={!!votedFor} onVote={() => onVote(c.id)} votingOpen={votingOpen} big />
+                <ShareButton contestant={c} />
+              </div>
             </div>
             <div className="nav-row">
               <button className="btn btn-ghost btn-sm" onClick={() => onOpen(prev.id)}>← {prev.name.split(" ")[0]}</button>
@@ -591,6 +633,25 @@ function App() {
     const id = setTimeout(() => setVotingOpen(true), ms);
     return () => clearTimeout(id);
   }, [votingOpen]);
+
+  // Open modal from ?fox=<id> once contestants are loaded.
+  const didAutoOpenRef = useRef(false);
+  useEffect(() => {
+    if (didAutoOpenRef.current || !contestants.length) return;
+    const foxId = new URLSearchParams(window.location.search).get("fox");
+    if (foxId && contestants.some((c) => c.id === foxId)) {
+      setOpenId(foxId);
+    }
+    didAutoOpenRef.current = true;
+  }, [contestants]);
+
+  // Keep ?fox= in sync with the open modal so the URL is always shareable.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (openId) url.searchParams.set("fox", openId);else
+    url.searchParams.delete("fox");
+    window.history.replaceState({}, "", url.toString());
+  }, [openId]);
 
   useEffect(() => {
     let cancelled = false;
