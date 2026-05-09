@@ -11,6 +11,41 @@ function publicPhotoUrl(path) {
   return window.sb.storage.from("nominations").getPublicUrl(path).data.publicUrl;
 }
 
+// Stable per-device hash, sent up with the vote so post-hoc abuse review can
+// cluster votes that share a device but used different anon sessions.
+// Trivially spoofable — intended as a soft signal, not a gate.
+async function deviceFingerprint() {
+  if (window.__ffpDeviceFingerprint) return window.__ffpDeviceFingerprint;
+  const parts = [
+    navigator.userAgent || "",
+    navigator.language || "",
+    String(navigator.hardwareConcurrency || ""),
+    navigator.platform || "",
+    `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    String(window.devicePixelRatio || ""),
+  ];
+  try { parts.push(Intl.DateTimeFormat().resolvedOptions().timeZone || ""); } catch {}
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 200; canvas.height = 50;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "top";
+    ctx.font = "14px 'Arial'";
+    ctx.fillStyle = "#f60";
+    ctx.fillRect(0, 0, 200, 50);
+    ctx.fillStyle = "#069";
+    ctx.fillText("Fox of Fox Point", 2, 2);
+    ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+    ctx.fillText("canvas-fp", 4, 17);
+    parts.push(canvas.toDataURL());
+  } catch {}
+  const data = new TextEncoder().encode(parts.join("|"));
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  const hex = Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+  window.__ffpDeviceFingerprint = hex;
+  return hex;
+}
+
 async function downscaleImage(file, maxDim = 800, quality = 0.85) {
   const dataUrl = await new Promise((res, rej) => {
     const r = new FileReader();
@@ -757,22 +792,26 @@ function App() {
     const c = contestants.find((x) => x.id === id);
     try {
       const session = await window.sbReady;
-      const { error } = await window.sb.from("votes").insert({
-        dog_id: id,
-        voter_id: session.user.id,
+      const fingerprint = await deviceFingerprint().catch(() => null);
+      const { error } = await window.sb.functions.invoke("cast-vote", {
+        body: { dog_id: id, fingerprint },
       });
       if (error) {
-        if (error.code === "23505") {
-          // already voted on a previous session/tab — refetch and reconcile
+        let code = null;
+        try { code = (await error.context.json())?.error; } catch {}
+        if (code === "already_voted") {
           const { data } = await window.sb
             .from("votes").select("dog_id").eq("voter_id", session.user.id).maybeSingle();
           if (data) setVotedFor(data.dog_id);
           showToast("Looks like you've already voted.");
           return;
         }
-        // RLS rejection or anything else
-        console.error("Vote insert failed:", error);
-        showToast("That candidate isn't accepting votes anymore.");
+        if (code === "not_approved") {
+          showToast("That candidate isn't accepting votes anymore.");
+          return;
+        }
+        console.error("Vote failed:", error, code);
+        showToast("Something went wrong. Try again?");
         return;
       }
       // Optimistic local count bump. Task 10's votes-INSERT handler MUST skip
