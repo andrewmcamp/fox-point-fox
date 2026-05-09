@@ -127,10 +127,10 @@ function ShareButton({ contestant }) {
   };
   return (
     <button
-      className={`share-btn ${copied ? "copied" : ""}`}
+      className={`pass-along-btn ${copied ? "copied" : ""}`}
       onClick={handle}
       aria-label={`Share ${contestant.name}`}>
-      <span className="share-icon" aria-hidden="true">{copied ? "✓" : "↗"}</span>
+      <span className="pass-along-icon" aria-hidden="true">{copied ? "✓" : "↗"}</span>
       <span>{copied ? "Copied!" : "Share"}</span>
     </button>);
 
