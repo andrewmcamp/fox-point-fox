@@ -203,7 +203,7 @@ function PendingList() {
 function SuspiciousVotesPanel() {
   const [state, setState] = useState({
     loading: true, error: "",
-    fpClusters: [], ipClusters: [],
+    clusters: [],
     totalVotes: 0, missingSignals: 0, dogName: new Map(),
   });
 
@@ -226,65 +226,44 @@ function SuspiciousVotesPanel() {
       const votes = votesRes.data || [];
       const metaByVote = new Map((metaRes.data || []).map((m) => [m.vote_id, m]));
 
-      const fpMap = new Map();
-      const ipDogMap = new Map();
+      // Cluster on the AND of (fingerprint, voter_ip). Both must be present
+      // and shared across more than one vote to flag.
+      const pairMap = new Map();
       let missing = 0;
       for (const v of votes) {
         const m = metaByVote.get(v.id);
         if (!m || (!m.fingerprint && !m.voter_ip)) missing++;
-        if (!m) continue;
-        const enriched = { dog_id: v.dog_id, created_at: v.created_at };
-        if (m.fingerprint) {
-          if (!fpMap.has(m.fingerprint)) fpMap.set(m.fingerprint, []);
-          fpMap.get(m.fingerprint).push(enriched);
-        }
-        if (m.voter_ip) {
-          const k = `${m.voter_ip}|${v.dog_id}`;
-          if (!ipDogMap.has(k)) ipDogMap.set(k, []);
-          ipDogMap.get(k).push(enriched);
-        }
+        if (!m || !m.fingerprint || !m.voter_ip) continue;
+        const k = `${m.fingerprint}|${m.voter_ip}`;
+        if (!pairMap.has(k)) pairMap.set(k, []);
+        pairMap.get(k).push({ dog_id: v.dog_id, created_at: v.created_at });
       }
 
-      const summarize = (arr) => {
-        let first = arr[0].created_at;
-        let last = arr[0].created_at;
-        for (const v of arr) {
-          if (v.created_at < first) first = v.created_at;
-          if (v.created_at > last) last = v.created_at;
-        }
-        return { first, last };
-      };
-
-      const fpClusters = [...fpMap.entries()]
+      const clusters = [...pairMap.entries()]
         .filter(([, arr]) => arr.length > 1)
-        .map(([fp, arr]) => {
-          const { first, last } = summarize(arr);
+        .map(([key, arr]) => {
+          const [fingerprint, voter_ip] = key.split("|");
+          let first = arr[0].created_at;
+          let last = arr[0].created_at;
+          for (const v of arr) {
+            if (v.created_at < first) first = v.created_at;
+            if (v.created_at > last) last = v.created_at;
+          }
           return {
-            fingerprint: fp,
+            fingerprint, voter_ip,
             n: arr.length,
             dogIds: [...new Set(arr.map((v) => v.dog_id))],
             firstAt: first, lastAt: last,
           };
         })
         // Hide clusters that are entirely votes for the admin's dog (test
-        // traffic). Cross-candidate clusters that include them stay visible —
-        // those are genuinely fishy regardless.
+        // traffic). Cross-candidate clusters that include them stay visible.
         .filter((c) => !(c.dogIds.length === 1 && c.dogIds[0] === ADMIN_DOG_ID))
-        .sort((a, b) => b.n - a.n);
-
-      const ipClusters = [...ipDogMap.entries()]
-        .filter(([, arr]) => arr.length > 4)
-        .map(([key, arr]) => {
-          const [ip, dog_id] = key.split("|");
-          const { first, last } = summarize(arr);
-          return { ip, dog_id, n: arr.length, firstAt: first, lastAt: last };
-        })
-        .filter((c) => c.dog_id !== ADMIN_DOG_ID)
         .sort((a, b) => b.n - a.n);
 
       setState({
         loading: false, error: "",
-        fpClusters, ipClusters,
+        clusters,
         totalVotes: votes.length, missingSignals: missing, dogName,
       });
     } catch (e) {
@@ -305,8 +284,7 @@ function SuspiciousVotesPanel() {
           <div className="suspicious-summary">
             <span><strong>{state.totalVotes}</strong> total</span>
             <span><strong>{state.missingSignals}</strong> legacy (no signals)</span>
-            <span><strong>{state.fpClusters.length}</strong> fingerprint clusters</span>
-            <span><strong>{state.ipClusters.length}</strong> IP/candidate flags</span>
+            <span><strong>{state.clusters.length}</strong> shared device+IP clusters</span>
           </div>
         </div>
         <button className="btn btn-ghost btn-sm" onClick={refresh} disabled={state.loading}>
@@ -316,46 +294,23 @@ function SuspiciousVotesPanel() {
       {state.error && <div className="empty-pending error">Error: {state.error}</div>}
 
       <div className="suspicious-section">
-        <h3>Shared fingerprints</h3>
-        <p className="suspicious-hint">Same device hash voted more than once.</p>
-        {state.fpClusters.length === 0 ? (
-          <div className="empty-pending">No fingerprint clusters.</div>
+        <p className="suspicious-hint">
+          Multiple votes from the same device fingerprint <em>and</em> the same IP. Two-of-a-kind on iOS in the same household can trip this — read the count and timing before acting.
+        </p>
+        {state.clusters.length === 0 ? (
+          <div className="empty-pending">No shared device+IP clusters.</div>
         ) : (
           <table className="suspicious-table">
             <thead>
-              <tr><th>Fingerprint</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th></tr>
+              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th></tr>
             </thead>
             <tbody>
-              {state.fpClusters.map((c) => (
-                <tr key={c.fingerprint}>
+              {state.clusters.map((c) => (
+                <tr key={`${c.fingerprint}|${c.voter_ip}`}>
                   <td className="mono">{c.fingerprint.slice(0, 12)}…</td>
+                  <td className="mono">{c.voter_ip}</td>
                   <td>{c.n}</td>
                   <td>{c.dogIds.map((id) => state.dogName.get(id) || id).join(", ")}</td>
-                  <td>{fmtTime(c.firstAt)}</td>
-                  <td>{fmtTime(c.lastAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="suspicious-section">
-        <h3>One IP, same candidate (&gt;4 votes)</h3>
-        <p className="suspicious-hint">A candidate received 5+ votes from a single IP.</p>
-        {state.ipClusters.length === 0 ? (
-          <div className="empty-pending">No flagged IP/candidate pairs.</div>
-        ) : (
-          <table className="suspicious-table">
-            <thead>
-              <tr><th>IP</th><th>Candidate</th><th>Votes</th><th>First</th><th>Last</th></tr>
-            </thead>
-            <tbody>
-              {state.ipClusters.map((c) => (
-                <tr key={`${c.ip}|${c.dog_id}`}>
-                  <td className="mono">{c.ip}</td>
-                  <td>{state.dogName.get(c.dog_id) || c.dog_id}</td>
-                  <td>{c.n}</td>
                   <td>{fmtTime(c.firstAt)}</td>
                   <td>{fmtTime(c.lastAt)}</td>
                 </tr>
