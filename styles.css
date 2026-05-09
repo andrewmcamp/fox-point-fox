@@ -877,3 +877,64 @@ h3 { font-size: 22px; line-height: 1.2; }
   .pending-actions { flex-direction: row; min-width: 0; }
   .pending-actions .btn { flex: 1 1 0; }
 }
+
+.suspicious-panel {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.suspicious-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 16px;
+  margin-bottom: 24px;
+}
+.suspicious-header h2 {
+  font-family: var(--display); font-weight: 700;
+  font-size: 26px; line-height: 1.15; color: var(--paper);
+  margin-bottom: 8px;
+}
+.suspicious-summary {
+  display: flex; flex-wrap: wrap; gap: 18px;
+  color: var(--ink-3); font-size: 14px;
+}
+.suspicious-summary strong { color: var(--paper); font-weight: 600; }
+
+.suspicious-section { margin-top: 28px; }
+.suspicious-section h3 {
+  font-family: var(--display); font-weight: 600;
+  font-size: 18px; color: var(--paper);
+  margin-bottom: 4px;
+}
+.suspicious-hint {
+  color: var(--ink-3); font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.suspicious-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 14px;
+}
+.suspicious-table th, .suspicious-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+}
+.suspicious-table thead th {
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.suspicious-table tbody tr:last-child td { border-bottom: 0; }
+.suspicious-table td.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--ink-2);
+}
