@@ -150,7 +150,7 @@ function VoteButton({ count, voted, hasVoted, onVote, big = false, votingOpen = 
   let label;
   if (voted) label = "Your pick";else
   if (!votingOpen) label = "Opens May 8";else
-  if (disabled) label = "Already voted";else
+  if (disabled) label = "Voted";else
   label = "Vote";
   return (
     <button
