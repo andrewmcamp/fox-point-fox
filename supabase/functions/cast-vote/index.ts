@@ -51,28 +51,26 @@ Deno.serve(async (req) => {
       ? body.fingerprint
       : null;
 
-  const { data: dog, error: dogErr } = await admin
-    .from("dogs").select("id,status").eq("id", dog_id).maybeSingle();
-  if (dogErr) {
-    console.error("dog lookup failed:", dogErr);
-    return jsonResponse({ error: "server_error" }, 500);
-  }
-  if (!dog || dog.status !== "approved") return jsonResponse({ error: "not_approved" }, 403);
-
   const voter_ip = clientIp(req);
   const user_agent = req.headers.get("User-Agent");
 
-  const { error: insErr } = await admin.from("votes").insert({
-    dog_id,
-    voter_id,
-    fingerprint,
-    voter_ip,
-    user_agent,
+  // Atomic insert into votes + votes_meta via SECURITY INVOKER RPC. Service
+  // role bypasses RLS for the writes; the function still validates dog status
+  // so a stale dog_id can't be voted for.
+  const { error: rpcErr } = await admin.rpc("cast_vote", {
+    p_dog_id: dog_id,
+    p_voter_id: voter_id,
+    p_fingerprint: fingerprint,
+    p_voter_ip: voter_ip,
+    p_user_agent: user_agent,
   });
 
-  if (insErr) {
-    if (insErr.code === "23505") return jsonResponse({ error: "already_voted" }, 409);
-    console.error("vote insert failed:", insErr);
+  if (rpcErr) {
+    if (rpcErr.code === "23505") return jsonResponse({ error: "already_voted" }, 409);
+    if (rpcErr.code === "P0001" || rpcErr.message?.includes("not_approved")) {
+      return jsonResponse({ error: "not_approved" }, 403);
+    }
+    console.error("cast_vote RPC failed:", rpcErr);
     return jsonResponse({ error: "server_error" }, 500);
   }
 
