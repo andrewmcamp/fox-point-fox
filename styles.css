@@ -910,9 +910,11 @@ h3 { font-size: 22px; line-height: 1.2; }
   margin-bottom: 12px;
 }
 
+/* border-collapse: separate is what lets the table respect border-radius. */
 .suspicious-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: var(--surface);
   border: 1px solid var(--rule-strong);
   border-radius: 14px;

@@ -219,6 +219,9 @@ function SuspiciousVotesPanel() {
       if (dogsRes.error) throw dogsRes.error;
 
       const dogName = new Map((dogsRes.data || []).map((d) => [d.id, d.name]));
+      // Jack is the admin's own dog; his votes drive most of our test traffic,
+      // so suppress clusters that resolve to him alone to keep the panel signal-y.
+      const jackId = (dogsRes.data || []).find((d) => d.name === "Jack")?.id;
       const votes = votesRes.data || [];
       const metaByVote = new Map((metaRes.data || []).map((m) => [m.vote_id, m]));
 
@@ -262,6 +265,10 @@ function SuspiciousVotesPanel() {
             firstAt: first, lastAt: last,
           };
         })
+        // Hide clusters that are entirely votes for Jack (admin test traffic).
+        // Cross-candidate clusters that include Jack stay visible — those are
+        // genuinely fishy regardless.
+        .filter((c) => !(jackId && c.dogIds.length === 1 && c.dogIds[0] === jackId))
         .sort((a, b) => b.n - a.n);
 
       const ipClusters = [...ipDogMap.entries()]
@@ -271,6 +278,7 @@ function SuspiciousVotesPanel() {
           const { first, last } = summarize(arr);
           return { ip, dog_id, n: arr.length, firstAt: first, lastAt: last };
         })
+        .filter((c) => c.dog_id !== jackId)
         .sort((a, b) => b.n - a.n);
 
       setState({
@@ -308,9 +316,7 @@ function SuspiciousVotesPanel() {
 
       <div className="suspicious-section">
         <h3>Shared fingerprints</h3>
-        <p className="suspicious-hint">
-          Same device hash voted more than once. Strongest signal — legitimate users almost never produce this.
-        </p>
+        <p className="suspicious-hint">Same device hash voted more than once.</p>
         {state.fpClusters.length === 0 ? (
           <div className="empty-pending">No fingerprint clusters.</div>
         ) : (
@@ -335,9 +341,7 @@ function SuspiciousVotesPanel() {
 
       <div className="suspicious-section">
         <h3>One IP, same candidate (&gt;4 votes)</h3>
-        <p className="suspicious-hint">
-          A candidate received 5+ votes from a single IP. Households share IPs, so investigate before acting.
-        </p>
+        <p className="suspicious-hint">A candidate received 5+ votes from a single IP.</p>
         {state.ipClusters.length === 0 ? (
           <div className="empty-pending">No flagged IP/candidate pairs.</div>
         ) : (
