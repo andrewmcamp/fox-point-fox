@@ -2,6 +2,10 @@
 const { useState, useEffect } = React;
 
 const ADMIN_EMAIL = "andrewmcamp@gmail.com";
+// Jack is the admin's own dog; suppress test-traffic clusters that resolve to
+// him alone in the suspicious-votes panel. Pinned by UUID so a name edit or a
+// future second "Jack" can't silently change what gets filtered.
+const ADMIN_DOG_ID = "5d985f9a-728c-4ba9-ab77-49ae3db40725";
 
 function LoginCard({ onSent }) {
   const [email, setEmail] = useState("");
@@ -219,9 +223,6 @@ function SuspiciousVotesPanel() {
       if (dogsRes.error) throw dogsRes.error;
 
       const dogName = new Map((dogsRes.data || []).map((d) => [d.id, d.name]));
-      // Jack is the admin's own dog; his votes drive most of our test traffic,
-      // so suppress clusters that resolve to him alone to keep the panel signal-y.
-      const jackId = (dogsRes.data || []).find((d) => d.name === "Jack")?.id;
       const votes = votesRes.data || [];
       const metaByVote = new Map((metaRes.data || []).map((m) => [m.vote_id, m]));
 
@@ -265,10 +266,10 @@ function SuspiciousVotesPanel() {
             firstAt: first, lastAt: last,
           };
         })
-        // Hide clusters that are entirely votes for Jack (admin test traffic).
-        // Cross-candidate clusters that include Jack stay visible — those are
-        // genuinely fishy regardless.
-        .filter((c) => !(jackId && c.dogIds.length === 1 && c.dogIds[0] === jackId))
+        // Hide clusters that are entirely votes for the admin's dog (test
+        // traffic). Cross-candidate clusters that include them stay visible —
+        // those are genuinely fishy regardless.
+        .filter((c) => !(c.dogIds.length === 1 && c.dogIds[0] === ADMIN_DOG_ID))
         .sort((a, b) => b.n - a.n);
 
       const ipClusters = [...ipDogMap.entries()]
@@ -278,7 +279,7 @@ function SuspiciousVotesPanel() {
           const { first, last } = summarize(arr);
           return { ip, dog_id, n: arr.length, firstAt: first, lastAt: last };
         })
-        .filter((c) => c.dog_id !== jackId)
+        .filter((c) => c.dog_id !== ADMIN_DOG_ID)
         .sort((a, b) => b.n - a.n);
 
       setState({
