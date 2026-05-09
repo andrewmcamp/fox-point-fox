@@ -634,11 +634,17 @@ function App() {
     return () => clearTimeout(id);
   }, [votingOpen]);
 
-  // Open modal from ?fox=<id> once contestants are loaded.
+  // Capture ?fox=<id> once at mount so the URL-sync effect below can't strip it
+  // before contestants finish loading.
+  const initialFoxIdRef = useRef(
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("fox")
+      : null
+  );
   const didAutoOpenRef = useRef(false);
   useEffect(() => {
     if (didAutoOpenRef.current || !contestants.length) return;
-    const foxId = new URLSearchParams(window.location.search).get("fox");
+    const foxId = initialFoxIdRef.current;
     if (foxId && contestants.some((c) => c.id === foxId)) {
       setOpenId(foxId);
     }
