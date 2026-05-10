@@ -203,7 +203,7 @@ function PendingList() {
 function SuspiciousVotesPanel({ session }) {
   const [state, setState] = useState({
     loading: true, error: "",
-    activeClusters: [],
+    activeDeviceIpClusters: [],
     invalidatedClusters: [],
     totalVotes: 0, missingSignals: 0, dogName: new Map(),
   });
@@ -261,6 +261,7 @@ function SuspiciousVotesPanel({ session }) {
           const allInvalidated = arr.every((v) => v.invalidated_at !== null);
           return {
             key,
+            type: "device-ip",
             fingerprint, voter_ip,
             n: arr.length,
             voteIds: arr.map((v) => v.id),
@@ -273,7 +274,7 @@ function SuspiciousVotesPanel({ session }) {
         // traffic). Cross-candidate clusters that include them stay visible.
         .filter((c) => !(c.dogIds.length === 1 && c.dogIds[0] === ADMIN_DOG_ID));
 
-      const activeClusters = allClusters
+      const activeDeviceIpClusters = allClusters
         .filter((c) => !c.allInvalidated)
         .sort((a, b) => b.n - a.n);
       const invalidatedClusters = allClusters
@@ -282,7 +283,7 @@ function SuspiciousVotesPanel({ session }) {
 
       setState({
         loading: false, error: "",
-        activeClusters, invalidatedClusters,
+        activeDeviceIpClusters, invalidatedClusters,
         totalVotes: votes.length, missingSignals: missing, dogName,
       });
     } catch (e) {
@@ -314,14 +315,14 @@ function SuspiciousVotesPanel({ session }) {
       if (invalidate) {
         return {
           ...s,
-          activeClusters: s.activeClusters.filter((c) => c.key !== cluster.key),
+          activeDeviceIpClusters: s.activeDeviceIpClusters.filter((c) => c.key !== cluster.key),
           invalidatedClusters: [updated, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
         };
       }
       return {
         ...s,
         invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
-        activeClusters: [updated, ...s.activeClusters].sort((a, b) => b.n - a.n),
+        activeDeviceIpClusters: [updated, ...s.activeDeviceIpClusters].sort((a, b) => b.n - a.n),
       };
     });
 
@@ -338,12 +339,12 @@ function SuspiciousVotesPanel({ session }) {
           return {
             ...s,
             invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
-            activeClusters: [reverted, ...s.activeClusters].sort((a, b) => b.n - a.n),
+            activeDeviceIpClusters: [reverted, ...s.activeDeviceIpClusters].sort((a, b) => b.n - a.n),
           };
         }
         return {
           ...s,
-          activeClusters: s.activeClusters.filter((c) => c.key !== cluster.key),
+          activeDeviceIpClusters: s.activeDeviceIpClusters.filter((c) => c.key !== cluster.key),
           invalidatedClusters: [reverted, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
         };
       });
@@ -363,7 +364,7 @@ function SuspiciousVotesPanel({ session }) {
           <div className="suspicious-summary">
             <span><strong>{state.totalVotes}</strong> total</span>
             <span><strong>{state.missingSignals}</strong> legacy (no signals)</span>
-            <span><strong>{state.activeClusters.length}</strong> active clusters</span>
+            <span><strong>{state.activeDeviceIpClusters.length}</strong> active clusters</span>
             <span><strong>{state.invalidatedClusters.length}</strong> invalidated clusters</span>
           </div>
         </div>
@@ -377,7 +378,7 @@ function SuspiciousVotesPanel({ session }) {
         <p className="suspicious-hint">
           Multiple votes from the same device fingerprint <em>and</em> the same IP. Two-of-a-kind on iOS in the same household can trip this — read the count and timing before acting.
         </p>
-        {state.activeClusters.length === 0 ? (
+        {state.activeDeviceIpClusters.length === 0 ? (
           <div className="empty-pending">No shared device+IP clusters.</div>
         ) : (
           <table className="suspicious-table">
@@ -385,7 +386,7 @@ function SuspiciousVotesPanel({ session }) {
               <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th><th>Action</th></tr>
             </thead>
             <tbody>
-              {state.activeClusters.map((c) => (
+              {state.activeDeviceIpClusters.map((c) => (
                 <tr key={c.key}>
                   <td className="mono">{c.fingerprint.slice(0, 12)}…</td>
                   <td className="mono">{c.voter_ip}</td>
