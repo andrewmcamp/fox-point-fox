@@ -339,6 +339,32 @@ function SuspiciousVotesPanel({ session }) {
           </table>
         )}
       </div>
+
+      {state.invalidatedClusters.length > 0 && (
+        <div className="suspicious-section">
+          <h3 style={{ marginTop: "1.5rem" }}>Invalidated clusters</h3>
+          <p className="suspicious-hint">
+            These clusters were soft-deleted and excluded from totals. Restore returns them to the active tally.
+          </p>
+          <table className="suspicious-table">
+            <thead>
+              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th></tr>
+            </thead>
+            <tbody>
+              {state.invalidatedClusters.map((c) => (
+                <tr key={c.key}>
+                  <td className="mono">{c.fingerprint.slice(0, 12)}…</td>
+                  <td className="mono">{c.voter_ip}</td>
+                  <td>{c.n}</td>
+                  <td>{c.dogIds.map((id) => state.dogName.get(id) || id).join(", ")}</td>
+                  <td>{fmtTime(c.firstAt)}</td>
+                  <td>{fmtTime(c.lastAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }
