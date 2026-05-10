@@ -416,7 +416,7 @@ function SuspiciousVotesPanel({ session }) {
           </p>
           <table className="suspicious-table">
             <thead>
-              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th></tr>
+              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th><th>Action</th></tr>
             </thead>
             <tbody>
               {state.invalidatedClusters.map((c) => (
@@ -427,6 +427,14 @@ function SuspiciousVotesPanel({ session }) {
                   <td>{c.dogIds.map((id) => state.dogName.get(id) || id).join(", ")}</td>
                   <td>{fmtTime(c.firstAt)}</td>
                   <td>{fmtTime(c.lastAt)}</td>
+                  <td>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setClusterInvalidation(c, false)}
+                      disabled={inFlight.has(c.key)}>
+                      {inFlight.has(c.key) ? "Working…" : "Restore"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
