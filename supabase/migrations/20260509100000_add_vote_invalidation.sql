@@ -19,7 +19,11 @@ create unique index votes_voter_id_active_uniq
 
 -- 3. View now excludes invalidated rows. Belt-and-suspenders given the new
 --    SELECT RLS posture below — non-admins can't see invalidated rows at all.
-create or replace view public.dog_vote_counts as
+--    security_invoker is explicit so the view evaluates RLS as the caller;
+--    CREATE OR REPLACE preserves reloptions but being explicit removes the
+--    implicit dependency on prior state.
+create or replace view public.dog_vote_counts
+  with (security_invoker = true) as
   select dog_id, count(*)::integer as votes
     from public.votes
    where invalidated_at is null
