@@ -462,7 +462,8 @@ function SuspiciousVotesPanel({ session }) {
             <span><strong>{state.totalVotes}</strong> total</span>
             <span><strong>{state.missingSignals}</strong> legacy (no signals)</span>
             <span><strong>{state.activeDeviceIpClusters.length}</strong> active clusters</span>
-            <span><strong>{state.invalidatedClusters.length}</strong> invalidated clusters</span>
+            <span><strong>{state.activeTimeBurstClusters.length}</strong> active bursts</span>
+            <span><strong>{state.invalidatedClusters.length}</strong> invalidated</span>
           </div>
         </div>
         <button className="btn btn-ghost btn-sm" onClick={refresh} disabled={state.loading}>
@@ -501,6 +502,45 @@ function SuspiciousVotesPanel({ session }) {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="suspicious-section">
+        <h3 style={{ marginTop: "1.5rem" }}>Time-cluster bursts (legacy)</h3>
+        <p className="suspicious-hint">
+          Legacy votes (no device/IP) where {BURST_MIN_VOTES_IN_WINDOW}+ votes for the same candidate landed in {BURST_WINDOW_SECONDS} seconds, extended while gaps stayed under {BURST_MAX_GAP_SECONDS} seconds. Two real friends voting back-to-back can occasionally trip this — read the timing before acting.
+        </p>
+        {state.activeTimeBurstClusters.length === 0 ? (
+          <div className="empty-pending">No legacy-vote bursts.</div>
+        ) : (
+          <table className="suspicious-table">
+            <thead>
+              <tr><th>Candidate</th><th>Votes</th><th>Duration</th><th>First 60s</th><th>First</th><th>Last</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {state.activeTimeBurstClusters.map((c) => {
+                const durSec = Math.round((new Date(c.lastAt).getTime() - new Date(c.firstAt).getTime()) / 1000);
+                return (
+                  <tr key={c.key}>
+                    <td>{c.dog_name}</td>
+                    <td>{c.n}</td>
+                    <td>{durSec}s</td>
+                    <td>{c.votesInFirst60s}</td>
+                    <td>{fmtTime(c.firstAt)}</td>
+                    <td>{fmtTime(c.lastAt)}</td>
+                    <td>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setClusterInvalidation(c, true)}
+                        disabled={inFlight.has(c.key)}>
+                        {inFlight.has(c.key) ? "Working…" : "Invalidate"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
