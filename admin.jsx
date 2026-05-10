@@ -229,8 +229,11 @@ function buildTimeBurstClusters(legacyVotes, dogName) {
     const flushIfQualifying = () => {
       if (burst.length === 0) return;
       const firstAt = burst[0].created_at;
-      const cutoff = new Date(new Date(firstAt).getTime() + BURST_WINDOW_SECONDS * 1000).toISOString();
-      const inWindow = burst.filter((v) => v.created_at <= cutoff).length;
+      // Compare on epoch ms — Postgres serializes timestamptz with +00:00 and 6
+      // microsecond digits; toISOString() emits Z and 3 milliseconds, so string
+      // compare across the formats can include sub-ms-late votes incorrectly.
+      const cutoffMs = new Date(firstAt).getTime() + BURST_WINDOW_SECONDS * 1000;
+      const inWindow = burst.filter((v) => new Date(v.created_at).getTime() <= cutoffMs).length;
       if (inWindow >= BURST_MIN_VOTES_IN_WINDOW) {
         clusters.push({
           key: `burst:${dog_id}:${firstAt}`,
@@ -279,8 +282,8 @@ function SuspiciousVotesPanel({ session }) {
     invalidatedClusters: [],
     totalVotes: 0, missingSignals: 0, dogName: new Map(),
   });
-  // Cluster keys (`fingerprint|voter_ip`) currently mid-update. Mirrors the
-  // PendingList inFlight pattern.
+  // Cluster keys (device-ip: `fingerprint|voter_ip`; time-burst:
+  // `burst:dog_id:firstAt`) currently mid-update. Mirrors PendingList's pattern.
   const [inFlight, setInFlight] = useState(new Set());
 
   const refresh = async () => {
