@@ -293,6 +293,66 @@ function SuspiciousVotesPanel({ session }) {
 
   useEffect(() => { refresh(); }, []);
 
+  const setClusterInvalidation = async (cluster, invalidate) => {
+    if (inFlight.has(cluster.key)) return;
+    if (invalidate && !window.confirm(
+      `Invalidate all ${cluster.n} votes in this cluster? They will be excluded from totals.`
+    )) return;
+    if (!invalidate && !window.confirm(
+      `Restore all ${cluster.n} votes in this cluster?`
+    )) return;
+
+    setInFlight((s) => { const n = new Set(s); n.add(cluster.key); return n; });
+
+    const patch = invalidate
+      ? { invalidated_at: new Date().toISOString(), invalidated_by: session.user.id }
+      : { invalidated_at: null, invalidated_by: null };
+
+    // Optimistic UI: move the cluster between lists immediately.
+    setState((s) => {
+      const updated = { ...cluster, allInvalidated: invalidate };
+      if (invalidate) {
+        return {
+          ...s,
+          activeClusters: s.activeClusters.filter((c) => c.key !== cluster.key),
+          invalidatedClusters: [updated, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
+        };
+      }
+      return {
+        ...s,
+        invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
+        activeClusters: [updated, ...s.activeClusters].sort((a, b) => b.n - a.n),
+      };
+    });
+
+    const { error } = await window.sb
+      .from("votes")
+      .update(patch)
+      .in("id", cluster.voteIds);
+
+    if (error) {
+      // Revert optimistic move.
+      setState((s) => {
+        const reverted = { ...cluster, allInvalidated: !invalidate };
+        if (invalidate) {
+          return {
+            ...s,
+            invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
+            activeClusters: [reverted, ...s.activeClusters].sort((a, b) => b.n - a.n),
+          };
+        }
+        return {
+          ...s,
+          activeClusters: s.activeClusters.filter((c) => c.key !== cluster.key),
+          invalidatedClusters: [reverted, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
+        };
+      });
+      alert((invalidate ? "Invalidate" : "Restore") + " failed: " + error.message);
+    }
+
+    setInFlight((s) => { const n = new Set(s); n.delete(cluster.key); return n; });
+  };
+
   const fmtTime = (iso) => (iso ? new Date(iso).toLocaleString() : "—");
 
   return (
@@ -322,17 +382,25 @@ function SuspiciousVotesPanel({ session }) {
         ) : (
           <table className="suspicious-table">
             <thead>
-              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th></tr>
+              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th><th>Action</th></tr>
             </thead>
             <tbody>
               {state.activeClusters.map((c) => (
-                <tr key={`${c.fingerprint}|${c.voter_ip}`}>
+                <tr key={c.key}>
                   <td className="mono">{c.fingerprint.slice(0, 12)}…</td>
                   <td className="mono">{c.voter_ip}</td>
                   <td>{c.n}</td>
                   <td>{c.dogIds.map((id) => state.dogName.get(id) || id).join(", ")}</td>
                   <td>{fmtTime(c.firstAt)}</td>
                   <td>{fmtTime(c.lastAt)}</td>
+                  <td>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setClusterInvalidation(c, true)}
+                      disabled={inFlight.has(c.key)}>
+                      {inFlight.has(c.key) ? "Working…" : "Invalidate"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
