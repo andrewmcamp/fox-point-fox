@@ -200,7 +200,7 @@ function PendingList() {
   );
 }
 
-function SuspiciousVotesPanel() {
+function SuspiciousVotesPanel({ session }) {
   const [state, setState] = useState({
     loading: true, error: "",
     clusters: [],
@@ -364,7 +364,7 @@ function AdminApp() {
         </button>
       </div>
       <PendingList />
-      <SuspiciousVotesPanel />
+      <SuspiciousVotesPanel session={session} />
     </div>
   );
 }
