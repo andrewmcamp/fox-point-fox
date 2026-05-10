@@ -7,6 +7,14 @@ const ADMIN_EMAIL = "andrewmcamp@gmail.com";
 // future second "Jack" can't silently change what gets filtered.
 const ADMIN_DOG_ID = "5d985f9a-728c-4ba9-ab77-49ae3db40725";
 
+// Legacy-vote burst heuristic: a cluster of legacy votes (no fingerprint, no IP)
+// for the same candidate where MIN_VOTES_IN_WINDOW or more votes land within
+// WINDOW_SECONDS of the burst's first vote, with consecutive gaps under
+// MAX_GAP_SECONDS keeping the burst alive.
+const BURST_MIN_VOTES_IN_WINDOW = 7;
+const BURST_WINDOW_SECONDS = 60;
+const BURST_MAX_GAP_SECONDS = 30;
+
 function LoginCard({ onSent }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -200,10 +208,74 @@ function PendingList() {
   );
 }
 
+// Identify legacy-vote burst clusters per candidate. Input: every legacy vote
+// (no fingerprint, no IP) including invalidated ones, plus the dog-name map.
+// Output: cluster objects with the same shape the existing fingerprint+IP
+// builder uses, plus type = "time-burst".
+function buildTimeBurstClusters(legacyVotes, dogName) {
+  // Group by dog_id, sorted ascending by created_at.
+  const byDog = new Map();
+  for (const v of legacyVotes) {
+    if (!byDog.has(v.dog_id)) byDog.set(v.dog_id, []);
+    byDog.get(v.dog_id).push(v);
+  }
+  for (const arr of byDog.values()) {
+    arr.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  }
+
+  const clusters = [];
+  for (const [dog_id, arr] of byDog.entries()) {
+    let burst = [];
+    const flushIfQualifying = () => {
+      if (burst.length === 0) return;
+      const firstAt = burst[0].created_at;
+      const cutoff = new Date(new Date(firstAt).getTime() + BURST_WINDOW_SECONDS * 1000).toISOString();
+      const inWindow = burst.filter((v) => v.created_at <= cutoff).length;
+      if (inWindow >= BURST_MIN_VOTES_IN_WINDOW) {
+        clusters.push({
+          key: `burst:${dog_id}:${firstAt}`,
+          type: "time-burst",
+          dog_id,
+          dog_name: dogName.get(dog_id) || dog_id,
+          n: burst.length,
+          voteIds: burst.map((v) => v.id),
+          dogIds: [dog_id],
+          firstAt,
+          lastAt: burst[burst.length - 1].created_at,
+          votesInFirst60s: inWindow,
+          allInvalidated: burst.every((v) => v.invalidated_at !== null),
+        });
+      }
+      burst = [];
+    };
+
+    for (const v of arr) {
+      if (burst.length === 0) {
+        burst.push(v);
+        continue;
+      }
+      const prev = burst[burst.length - 1];
+      const gapSec = (new Date(v.created_at).getTime() - new Date(prev.created_at).getTime()) / 1000;
+      if (gapSec > BURST_MAX_GAP_SECONDS) {
+        flushIfQualifying();
+        burst.push(v);
+      } else {
+        burst.push(v);
+      }
+    }
+    flushIfQualifying();
+  }
+
+  // Hide bursts that are entirely the admin's dog (test traffic), matching
+  // the existing fingerprint+IP filter convention.
+  return clusters.filter((c) => c.dog_id !== ADMIN_DOG_ID);
+}
+
 function SuspiciousVotesPanel({ session }) {
   const [state, setState] = useState({
     loading: true, error: "",
     activeDeviceIpClusters: [],
+    activeTimeBurstClusters: [],
     invalidatedClusters: [],
     totalVotes: 0, missingSignals: 0, dogName: new Map(),
   });
@@ -277,13 +349,31 @@ function SuspiciousVotesPanel({ session }) {
       const activeDeviceIpClusters = allClusters
         .filter((c) => !c.allInvalidated)
         .sort((a, b) => b.n - a.n);
-      const invalidatedClusters = allClusters
-        .filter((c) => c.allInvalidated)
+      const invalidatedDeviceIpClusters = allClusters
+        .filter((c) => c.allInvalidated);
+
+      // Build legacy vote list (no fingerprint, no IP — or no meta row at all),
+      // including invalidated rows so already-invalidated bursts can surface
+      // in the Invalidated section for restore.
+      const legacyVotes = votes.filter((v) => {
+        const m = metaByVote.get(v.id);
+        return !m || (!m.fingerprint && !m.voter_ip);
+      });
+      const burstClusters = buildTimeBurstClusters(legacyVotes, dogName);
+      const activeTimeBurstClusters = burstClusters
+        .filter((c) => !c.allInvalidated)
         .sort((a, b) => b.n - a.n);
+      const invalidatedTimeBurstClusters = burstClusters
+        .filter((c) => c.allInvalidated);
+
+      const invalidatedClusters = [
+        ...invalidatedDeviceIpClusters,
+        ...invalidatedTimeBurstClusters,
+      ].sort((a, b) => b.n - a.n);
 
       setState({
         loading: false, error: "",
-        activeDeviceIpClusters, invalidatedClusters,
+        activeDeviceIpClusters, activeTimeBurstClusters, invalidatedClusters,
         totalVotes: votes.length, missingSignals: missing, dogName,
       });
     } catch (e) {
@@ -309,20 +399,24 @@ function SuspiciousVotesPanel({ session }) {
       ? { invalidated_at: new Date().toISOString(), invalidated_by: session.user.id }
       : { invalidated_at: null, invalidated_by: null };
 
-    // Optimistic UI: move the cluster between lists immediately.
+    // Optimistic UI: move the cluster between lists immediately. The active
+    // side is keyed by cluster.type; the invalidated side is unified.
     setState((s) => {
       const updated = { ...cluster, allInvalidated: invalidate };
+      const activeKey = cluster.type === "time-burst"
+        ? "activeTimeBurstClusters"
+        : "activeDeviceIpClusters";
       if (invalidate) {
         return {
           ...s,
-          activeDeviceIpClusters: s.activeDeviceIpClusters.filter((c) => c.key !== cluster.key),
+          [activeKey]: s[activeKey].filter((c) => c.key !== cluster.key),
           invalidatedClusters: [updated, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
         };
       }
       return {
         ...s,
         invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
-        activeDeviceIpClusters: [updated, ...s.activeDeviceIpClusters].sort((a, b) => b.n - a.n),
+        [activeKey]: [updated, ...s[activeKey]].sort((a, b) => b.n - a.n),
       };
     });
 
@@ -335,16 +429,19 @@ function SuspiciousVotesPanel({ session }) {
       // Revert optimistic move.
       setState((s) => {
         const reverted = { ...cluster, allInvalidated: !invalidate };
+        const activeKey = cluster.type === "time-burst"
+          ? "activeTimeBurstClusters"
+          : "activeDeviceIpClusters";
         if (invalidate) {
           return {
             ...s,
             invalidatedClusters: s.invalidatedClusters.filter((c) => c.key !== cluster.key),
-            activeDeviceIpClusters: [reverted, ...s.activeDeviceIpClusters].sort((a, b) => b.n - a.n),
+            [activeKey]: [reverted, ...s[activeKey]].sort((a, b) => b.n - a.n),
           };
         }
         return {
           ...s,
-          activeDeviceIpClusters: s.activeDeviceIpClusters.filter((c) => c.key !== cluster.key),
+          [activeKey]: s[activeKey].filter((c) => c.key !== cluster.key),
           invalidatedClusters: [reverted, ...s.invalidatedClusters].sort((a, b) => b.n - a.n),
         };
       });
@@ -417,13 +514,14 @@ function SuspiciousVotesPanel({ session }) {
           </p>
           <table className="suspicious-table">
             <thead>
-              <tr><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th><th>Action</th></tr>
+              <tr><th>Type</th><th>Fingerprint</th><th>IP</th><th>Votes</th><th>Candidates</th><th>First</th><th>Last</th><th>Action</th></tr>
             </thead>
             <tbody>
               {state.invalidatedClusters.map((c) => (
                 <tr key={c.key}>
-                  <td className="mono">{c.fingerprint.slice(0, 12)}…</td>
-                  <td className="mono">{c.voter_ip}</td>
+                  <td>{c.type === "time-burst" ? "time burst" : "device+IP"}</td>
+                  <td className="mono">{c.fingerprint ? `${c.fingerprint.slice(0, 12)}…` : "—"}</td>
+                  <td className="mono">{c.voter_ip || "—"}</td>
                   <td>{c.n}</td>
                   <td>{c.dogIds.map((id) => state.dogName.get(id) || id).join(", ")}</td>
                   <td>{fmtTime(c.firstAt)}</td>
