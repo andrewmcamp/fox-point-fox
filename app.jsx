@@ -701,7 +701,7 @@ function App() {
         const session = await window.sbReady;
         sessionUserIdRef.current = session.user.id;
         const [dogsRes, countsRes, voteRes] = await Promise.all([
-          window.sb.from("dogs").select("*").eq("status", "approved"),
+          window.sb.from("dogs_public").select("*"),
           window.sb.from("dog_vote_counts").select("*"),
           window.sb.from("votes").select("dog_id").eq("voter_id", session.user.id).maybeSingle(),
         ]);
