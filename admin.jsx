@@ -15,6 +15,25 @@ const BURST_MIN_VOTES_IN_WINDOW = 7;
 const BURST_WINDOW_SECONDS = 60;
 const BURST_MAX_GAP_SECONDS = 30;
 
+// Supabase enforces a server-side db-max-rows cap that silently truncates
+// responses (currently 1000 rows). .limit() does not override it. Page through
+// with .range() so fraud detection sees every row regardless of the cap.
+// buildQuery is a factory because the PostgREST builder isn't reusable once a
+// terminal method has been called; it must include the .order() needed for
+// deterministic paging.
+async function fetchAllRows(buildQuery, pageSize = 1000) {
+  const out = [];
+  for (let from = 0; ; from += pageSize) {
+    const to = from + pageSize - 1;
+    const { data, error } = await buildQuery().range(from, to);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    out.push(...data);
+    if (data.length < pageSize) break;
+  }
+  return out;
+}
+
 function LoginCard({ onSent }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -289,21 +308,24 @@ function SuspiciousVotesPanel({ session }) {
   const refresh = async () => {
     setState((s) => ({ ...s, loading: true, error: "" }));
     try {
-      // Default PostgREST limit is 1000; raise it so this stays correct as the
-      // election grows. Sensitive signals live on votes_meta (admin-read only via
-      // RLS); votes carries dog_id + created_at which we join client-side.
-      const [votesRes, metaRes, dogsRes] = await Promise.all([
-        window.sb.from("votes").select("id, dog_id, created_at, invalidated_at, invalidated_by").limit(20000),
-        window.sb.from("votes_meta").select("vote_id, fingerprint, voter_ip").limit(20000),
+      // Sensitive signals live on votes_meta (admin-read only via RLS); votes
+      // carries dog_id + created_at which we join client-side. Both tables can
+      // exceed the server-side row cap, so page through them; dogs is tiny.
+      const [votes, meta, dogsRes] = await Promise.all([
+        fetchAllRows(() =>
+          window.sb.from("votes")
+            .select("id, dog_id, created_at, invalidated_at, invalidated_by")
+            .order("id", { ascending: true })),
+        fetchAllRows(() =>
+          window.sb.from("votes_meta")
+            .select("vote_id, fingerprint, voter_ip")
+            .order("vote_id", { ascending: true })),
         window.sb.from("dogs").select("id, name"),
       ]);
-      if (votesRes.error) throw votesRes.error;
-      if (metaRes.error) throw metaRes.error;
       if (dogsRes.error) throw dogsRes.error;
 
       const dogName = new Map((dogsRes.data || []).map((d) => [d.id, d.name]));
-      const votes = votesRes.data || [];
-      const metaByVote = new Map((metaRes.data || []).map((m) => [m.vote_id, m]));
+      const metaByVote = new Map(meta.map((m) => [m.vote_id, m]));
 
       // Cluster on the AND of (fingerprint, voter_ip). Both must be present
       // and shared across more than one vote to flag.
