@@ -942,3 +942,47 @@ h3 { font-size: 22px; line-height: 1.2; }
   font-size: 13px;
   color: var(--ink-2);
 }
+
+/* === Voting notice (anti-fraud advisory above the candidates) === */
+.notice-wrap {
+  max-width: 900px;
+  margin: 32px auto 4px;
+  padding: 0 32px;
+}
+@media (max-width: 720px) { .notice-wrap { padding: 0 22px; } }
+.notice {
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-left: 4px solid var(--magenta);
+  border-radius: 16px;
+  padding: 22px 26px;
+  color: var(--ink-2);
+  font-size: 15.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow-1);
+}
+.notice p { margin-bottom: 12px; }
+.notice p:last-child { margin-bottom: 0; }
+.notice-details { margin-top: 4px; }
+.notice-details summary {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--magenta-2);
+  cursor: pointer;
+  list-style: none;
+  display: inline-block;
+  padding: 2px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.notice-details summary::-webkit-details-marker { display: none; }
+.notice-details summary:hover { color: var(--mint); }
+.notice-details[open] summary { color: var(--ink-3); margin-bottom: 10px; }
+.notice-details a { color: var(--magenta-2); }
+.notice-details a:hover { color: var(--mint); }
+.notice-sig {
+  font-family: var(--hand);
+  font-size: 24px;
+  color: var(--paper);
+  margin-top: 14px !important;
+}

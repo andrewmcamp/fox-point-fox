@@ -205,6 +205,55 @@ function CountdownClock({ deadline }) {
 
 }
 
+// === Voting notice (anti-fraud advisory shown above the candidates) ===
+function VotingNotice() {
+  return (
+    <section className="notice-wrap" role="note" aria-label="Notice about voting integrity">
+      <div className="notice">
+        <p>
+          There's been a rush of illegitimate votes for some pets. I'm really
+          disappointed that it's come to this, but to discourage future
+          cheating I'm going to be removing any pet that receives a
+          substantial number of falsified or illegitimate votes. So far, four
+          pets have been kicked out for a large number of votes from the same
+          person. Other pets have had their votes adjusted if most of their
+          votes looked legit but some didn't.
+        </p>
+        <p>
+          It's not fair to the pets being disqualified, but it also wouldn't
+          be fair to the pets earning their votes through honest campaigning.
+          This is supposed to be a light-hearted neighborhood event, not a
+          chance for some of you to pretend to be "hackers."
+        </p>
+        <details className="notice-details">
+          <summary>(see more)</summary>
+          <p>
+            How do I know what is a legitimate or illegitimate vote? Each time
+            you connect to a website, you send a lot of data about the device
+            you are using, how you're accessing the internet, and more. This
+            information is recorded by just about every page you visit and not
+            even the most privacy-focused setup can hide all of it. See some of
+            the data you're sharing at{" "}
+            <a href="https://personaldata.info" target="_blank" rel="noopener noreferrer">personaldata.info</a>.
+          </p>
+          <p>
+            That's the price we pay for being connected, and it's also how I
+            can keep a small amount of honesty in this competition. Plus, if
+            the same candidate gets 100 votes in the span of 30 seconds
+            that's pretty suspicious.
+          </p>
+          <p>
+            Feel free to email me (<a href="mailto:admin@foxpointfox.com">admin@foxpointfox.com</a>)
+            if you'd like to argue about this, but if you're not reasonable I'm
+            just going to ignore you.
+          </p>
+          <p className="notice-sig">— Andrew</p>
+        </details>
+      </div>
+    </section>);
+
+}
+
 // === Hero ===
 function Hero({ contestants, onJump, votingOpen }) {
   const total = contestants.reduce((s, c) => s + c.votes, 0);
@@ -858,6 +907,7 @@ function App() {
       </nav>
 
       <Hero contestants={contestants} onJump={handleJump} votingOpen={votingOpen} />
+      <VotingNotice />
       <FoxesSection contestants={contestants} votedFor={votedFor} onVote={handleVote} onOpen={setOpenId} error={error} votingOpen={votingOpen} />
       <SubmitSection onSubmitted={handleSubmitted} />
       <AboutSection />
