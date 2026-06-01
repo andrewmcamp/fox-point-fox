@@ -1,0 +1,869 @@
+[
+  {
+    "id": "8f583a08-5c2b-41cd-ae5f-2f7771197123",
+    "name": "Ruger",
+    "breed": "Pug",
+    "age": 5,
+    "owner": "Nicolas ",
+    "street": "Ives st, providence ",
+    "quote": "Can find him at CAPTAIN SEAWEEDS",
+    "platform": [
+      "Make all bars dog friendly",
+      "Make treats mandatory"
+    ],
+    "photo_url": "images/dogs/8f583a08-5c2b-41cd-ae5f-2f7771197123.jpg",
+    "final_rank": 1
+  },
+  {
+    "id": "d4dc81f8-7254-4354-ac67-bf8b2af96ad8",
+    "name": "Pickles",
+    "breed": "husky/cattle dog/other",
+    "age": 2,
+    "owner": "A. Coonin",
+    "street": "Transit St.",
+    "quote": "looks like a fox, acts like a fox. ",
+    "platform": [
+      "install a ball pit at the dog park"
+    ],
+    "photo_url": "images/dogs/d4dc81f8-7254-4354-ac67-bf8b2af96ad8.jpg",
+    "final_rank": 2
+  },
+  {
+    "id": "5d985f9a-728c-4ba9-ab77-49ae3db40725",
+    "name": "Jack",
+    "breed": "Pomeranian/Gremlin",
+    "age": 10,
+    "owner": "Andrew",
+    "street": "Ives St.",
+    "quote": "Smelly boy with a big heart",
+    "platform": [
+      "Universal basic treats (3/day)",
+      "Affirmative consent training at all dog parks",
+      "Formal apologies for his past behavior at dog parks"
+    ],
+    "photo_url": "images/dogs/5d985f9a-728c-4ba9-ab77-49ae3db40725.jpg",
+    "final_rank": 3
+  },
+  {
+    "id": "9048abd7-9700-40e0-8daa-4d077ceca038",
+    "name": "Charlie",
+    "breed": "Lab / Shepard mix",
+    "age": 8,
+    "owner": "Rob",
+    "street": "Trenton St.",
+    "quote": null,
+    "platform": [
+      "Allow dogs in all city parks on every side of the fence",
+      "Ban fireworks after 9pm (except holidays)",
+      "Advocate for second dinner"
+    ],
+    "photo_url": "images/dogs/9048abd7-9700-40e0-8daa-4d077ceca038.jpg",
+    "final_rank": 4
+  },
+  {
+    "id": "6b3e1b00-e58b-4378-9040-dcaa8315a44b",
+    "name": " Buddy",
+    "breed": "mini schnauzer",
+    "age": 13,
+    "owner": "N. Young",
+    "street": "E Transit",
+    "quote": "wants to go back inside.",
+    "platform": [
+      "lambchops 4 everyone!",
+      "advocate for fast snow removal",
+      "more flowers for sniffing (and peeing on)"
+    ],
+    "photo_url": "images/dogs/6b3e1b00-e58b-4378-9040-dcaa8315a44b.jpg",
+    "final_rank": 5
+  },
+  {
+    "id": "9e3a845c-b7fa-49f5-bb63-1092bda59641",
+    "name": "Suki",
+    "breed": "Shiba Inu",
+    "age": 4,
+    "owner": "Gavin",
+    "street": "Pitman Street",
+    "quote": "Coming to terrorize rabbits near you",
+    "platform": [
+      "Every house shall have a little treat box",
+      "All dogs and their owners must consent to sniffing",
+      "Winter will be four seasons a year"
+    ],
+    "photo_url": "images/dogs/9e3a845c-b7fa-49f5-bb63-1092bda59641.jpg",
+    "final_rank": 6
+  },
+  {
+    "id": "ec27987d-8153-4813-b826-abfdcce2f14d",
+    "name": "Iggy",
+    "breed": "Terrier mix",
+    "age": 3,
+    "owner": "Kathleen",
+    "street": "East George",
+    "quote": "Iggy loves to chase balls more than anything. ",
+    "platform": [
+      "Eliminate loud vehicles in Fox Point.",
+      "Restore the dog water fountain in India Point Park.",
+      "Ensure balls are always available at the dog park."
+    ],
+    "photo_url": "images/dogs/ec27987d-8153-4813-b826-abfdcce2f14d.jpg",
+    "final_rank": 7
+  },
+  {
+    "id": "ee11f80d-6038-4401-8f24-046758cedff4",
+    "name": "Kugel (koo-guhl)",
+    "breed": "A fox",
+    "age": 9,
+    "owner": "Rosie",
+    "street": "George M Cohan Blvd.",
+    "quote": "Best of Rhode Island’s Best Smile Winner 9 years running✨",
+    "platform": [
+      "More grass to roll in and more pup cups for all!!"
+    ],
+    "photo_url": "images/dogs/ee11f80d-6038-4401-8f24-046758cedff4.jpg",
+    "final_rank": 8
+  },
+  {
+    "id": "868d3c5d-96e4-4f41-bddc-9639dfb4fd1d",
+    "name": "Finnaegan",
+    "breed": "Bernese mountain dog",
+    "age": 3,
+    "owner": "Blake",
+    "street": "Pitman",
+    "quote": "Finn jumped out of the car window once because he didn’t want to leave the dog park",
+    "platform": [
+      "Stick removal service (salary is more sticks)",
+      "Mandatory nap times",
+      "Doggy water stations"
+    ],
+    "photo_url": "images/dogs/868d3c5d-96e4-4f41-bddc-9639dfb4fd1d.jpg",
+    "final_rank": 9
+  },
+  {
+    "id": "f6421b0a-41d6-45ec-99d5-90b2b5ad1f21",
+    "name": "Stormy Fox",
+    "breed": "Mutt ",
+    "age": 3,
+    "owner": "EJ",
+    "street": "Pitman St",
+    "quote": "Stormy is a disabled rescue dog who loves to love. He survived a back injury when he was just 1 years old that paralyzed his back legs temporarily. He is recovered now and loves nothing more than going for long walks in fox point.  ",
+    "platform": [
+      "More dogs at the dog park",
+      "Free treats and pets everyday",
+      "No more sirens or yelling"
+    ],
+    "photo_url": "images/dogs/f6421b0a-41d6-45ec-99d5-90b2b5ad1f21.jpg",
+    "final_rank": 10
+  },
+  {
+    "id": "666f1df4-a81a-45b7-8e41-29e7cee6b0da",
+    "name": "¢ha$e",
+    "breed": "French bulldog ",
+    "age": 2,
+    "owner": "Louie",
+    "street": "Transit St.",
+    "quote": "more like a little black bear not a fox 😂",
+    "platform": [
+      "we want",
+      "more spots with free doggie bags in the parks!",
+      "more belly rubs!",
+      "and to see all cafes and parks are dog friendly!"
+    ],
+    "photo_url": "images/dogs/666f1df4-a81a-45b7-8e41-29e7cee6b0da.jpg",
+    "final_rank": 11
+  },
+  {
+    "id": "ffda3400-66ea-445f-bd11-99e0a1b9c8d0",
+    "name": "Finn",
+    "breed": "Lab Mix",
+    "age": 4,
+    "owner": "Katie",
+    "street": "Wickenden St",
+    "quote": "Is the unofficial Resident Hole Digger in Fox Point (You’ve likely spotted his work)",
+    "platform": [
+      "More dog waste stations in Fox Point!"
+    ],
+    "photo_url": "images/dogs/ffda3400-66ea-445f-bd11-99e0a1b9c8d0.jpg",
+    "final_rank": 12
+  },
+  {
+    "id": "a2dbdd04-c0b7-48f3-b849-5faed5ae531f",
+    "name": "Cody",
+    "breed": "no clue, might actually be part fox ",
+    "age": 1,
+    "owner": "Sadie",
+    "street": "Trenton St.",
+    "quote": "professional rat exterminator with 0% success rate but 100% commitment to his dreams ",
+    "platform": [
+      "make excited peeing socially acceptable"
+    ],
+    "photo_url": "images/dogs/a2dbdd04-c0b7-48f3-b849-5faed5ae531f.jpg",
+    "final_rank": 13
+  },
+  {
+    "id": "0faaa0c5-1e7e-4602-8754-7af3d73b22a4",
+    "name": "Auca",
+    "breed": "Mixed breed",
+    "age": 4,
+    "owner": "Ampa",
+    "street": "Pitman St",
+    "quote": "She loves squirrels.",
+    "platform": [
+      "More benches at Gano Park"
+    ],
+    "photo_url": "images/dogs/0faaa0c5-1e7e-4602-8754-7af3d73b22a4.jpg",
+    "final_rank": 14
+  },
+  {
+    "id": "73730a88-2629-4c43-bd3b-ac3b17813cdf",
+    "name": "Georgie ",
+    "breed": "St.Bernard / Anatolian Shepherd ",
+    "age": 1,
+    "owner": "Adri and Michael ",
+    "street": "James St. ",
+    "quote": "Appointed herself the Mayor of the Pedestrian Bridge™️",
+    "platform": [
+      "Cookie jars at every trash can",
+      "One bunny allowance per day",
+      "More sticks"
+    ],
+    "photo_url": "images/dogs/73730a88-2629-4c43-bd3b-ac3b17813cdf.jpg",
+    "final_rank": 15
+  },
+  {
+    "id": "a25aca81-7930-41ce-b996-a81995d2a0b5",
+    "name": "Sadie",
+    "breed": "Tuxedo",
+    "age": 13,
+    "owner": "Amit",
+    "street": "Transit St.",
+    "quote": "Is actually a cat. ",
+    "platform": [
+      "Mass Transit System for all of Rhode Island."
+    ],
+    "photo_url": "images/dogs/a25aca81-7930-41ce-b996-a81995d2a0b5.jpg",
+    "final_rank": 16
+  },
+  {
+    "id": "e6cbf7f7-b025-4449-8e69-5b0e52d53fec",
+    "name": "Phoenix",
+    "breed": "Collie/corgi mix ",
+    "age": 12,
+    "owner": "Mary ",
+    "street": "Ives St ",
+    "quote": "Small dog, big personality ",
+    "platform": [
+      "Create more affordable housing so people can get more pets.",
+      "Cheese sticks for all!"
+    ],
+    "photo_url": "images/dogs/e6cbf7f7-b025-4449-8e69-5b0e52d53fec.jpg",
+    "final_rank": 17
+  },
+  {
+    "id": "fadc75d2-6ad8-4396-83dd-3d22136dca46",
+    "name": "Maeby",
+    "breed": "everything and nothing",
+    "age": 7,
+    "owner": "Indigo",
+    "street": "Ives St.",
+    "quote": "The sweetest, bravest, smartest, creature on planet earth!",
+    "platform": [
+      "More pee to pee on.",
+      "More doggy butts to sniff.",
+      "More pets from strangers.",
+      "More treats from the liquor and book stores in the neighborhood."
+    ],
+    "photo_url": "images/dogs/fadc75d2-6ad8-4396-83dd-3d22136dca46.jpg",
+    "final_rank": 18
+  },
+  {
+    "id": "6a1adf2c-fb87-41f6-a822-408ee1d50809",
+    "name": "Harry",
+    "breed": "Labrador retriever",
+    "age": 8,
+    "owner": "gerri",
+    "street": "Gano St.",
+    "quote": "he's such a good boy a loyal and loving companion",
+    "platform": [
+      "Beg for dog bisquits"
+    ],
+    "photo_url": "images/dogs/6a1adf2c-fb87-41f6-a822-408ee1d50809.jpg",
+    "final_rank": 19
+  },
+  {
+    "id": "54a0ccd7-c944-4ec4-92ff-500d8e151b80",
+    "name": "Ollie",
+    "breed": "Chihuahua Terrier Mix",
+    "age": 4,
+    "owner": "Alexandra Rivas",
+    "street": "East Manning",
+    "quote": "he’s just a little guy!!",
+    "platform": [
+      "— advocate for a dog’s right to shredded cheese straight out of the bag",
+      "— incentivize dog friendly pub patios",
+      "— steal your girl, probably"
+    ],
+    "photo_url": "images/dogs/54a0ccd7-c944-4ec4-92ff-500d8e151b80.jpg",
+    "final_rank": 20
+  },
+  {
+    "id": "d8da6b4a-3673-4036-a87b-8361a43c1622",
+    "name": "Stevie",
+    "breed": "Australian Cattle Dog mix",
+    "age": 3,
+    "owner": "Sawyer",
+    "street": "East George St",
+    "quote": "Will sell owners for a ball",
+    "platform": [
+      "Free ball theft insurance",
+      "3x local squirrel population",
+      "Universal lost toy counseling"
+    ],
+    "photo_url": "images/dogs/d8da6b4a-3673-4036-a87b-8361a43c1622.jpg",
+    "final_rank": 21
+  },
+  {
+    "id": "437e4436-54bd-4ecb-8503-ffcc694a25f5",
+    "name": "Dino",
+    "breed": "Bernese Mountain Dog",
+    "age": 2,
+    "owner": "Tony",
+    "street": "E Transit",
+    "quote": " Some consider me foxxy. ",
+    "platform": [
+      "Free squeaker toys on each block"
+    ],
+    "photo_url": "images/dogs/437e4436-54bd-4ecb-8503-ffcc694a25f5.jpg",
+    "final_rank": 22
+  },
+  {
+    "id": "6910c116-bcec-4e91-bb54-6cfa381bd7c7",
+    "name": "Chompers",
+    "breed": "“Dog”",
+    "age": 7,
+    "owner": "Penelope",
+    "street": "Governor St.",
+    "quote": "Professional Pantry Panther, and occasional porch-lurker. Monitors Brown students from the window.",
+    "platform": [
+      "More Fancy Feast varieties @ the CVS",
+      "Plant some catnip around the neighborhood"
+    ],
+    "photo_url": "images/dogs/6910c116-bcec-4e91-bb54-6cfa381bd7c7.jpg",
+    "final_rank": 23
+  },
+  {
+    "id": "f740f87e-6f6b-4263-a3f2-3209c9cc5517",
+    "name": "Cleopatra",
+    "breed": "Dachshund",
+    "age": 6,
+    "owner": "T Russell",
+    "street": "Gano St",
+    "quote": "She is the most ferocious fox and a literal queen",
+    "platform": [
+      "Free treats for all - to give to her of course!",
+      "No more fireworks and loud cars!",
+      "Mailmen would be canceled!"
+    ],
+    "photo_url": "images/dogs/f740f87e-6f6b-4263-a3f2-3209c9cc5517.jpg",
+    "final_rank": 24
+  },
+  {
+    "id": "05fb02ed-f3c9-400a-bfea-4b1c6cc56de2",
+    "name": "Link",
+    "breed": "Papillon",
+    "age": 5,
+    "owner": "Greg Sargeant",
+    "street": "Governor",
+    "quote": null,
+    "platform": [
+      "Advocate for a small dog section at Gano Dog Park"
+    ],
+    "photo_url": "images/dogs/05fb02ed-f3c9-400a-bfea-4b1c6cc56de2.jpg",
+    "final_rank": 25
+  },
+  {
+    "id": "72516f03-6760-442f-a162-60137a58bf17",
+    "name": "Timber",
+    "breed": "Goldendoodle",
+    "age": 1,
+    "owner": "Suzanne Elfman",
+    "street": "E Transit ",
+    "quote": "CEO of the Gano St. Dunkin",
+    "platform": [
+      "Stick libraries on every street corner",
+      "More balls, for all",
+      "Free kisses and licks for every constituent",
+      "Cheese vending machines in every park"
+    ],
+    "photo_url": "images/dogs/72516f03-6760-442f-a162-60137a58bf17.jpg",
+    "final_rank": 26
+  },
+  {
+    "id": "87426295-7413-4f7c-9c91-d09f43f2167d",
+    "name": "Penny",
+    "breed": "Bassett/pomeranian/chihuahua",
+    "age": 8,
+    "owner": "Amanda",
+    "street": "Transit St.",
+    "quote": "Likes to play Scrabble",
+    "platform": [
+      "No air brakes"
+    ],
+    "photo_url": "images/dogs/87426295-7413-4f7c-9c91-d09f43f2167d.jpg",
+    "final_rank": 27
+  },
+  {
+    "id": "b2e43258-da40-465d-ad52-d8148285243f",
+    "name": "CiCi",
+    "breed": "Silken Windhound",
+    "age": 7,
+    "owner": "Dan",
+    "street": "Brown St",
+    "quote": "She has been mistaken for a fox before. ",
+    "platform": [
+      "Spin jumps and the fastest zoomies you’ve ever witnessed."
+    ],
+    "photo_url": "images/dogs/b2e43258-da40-465d-ad52-d8148285243f.jpg",
+    "final_rank": 28
+  },
+  {
+    "id": "a708f1a2-2480-4979-8cda-cb25bae5d1b6",
+    "name": "Billie ",
+    "breed": "Beagle",
+    "age": 2,
+    "owner": "T Rowe",
+    "street": "Mayflower St.",
+    "quote": "She is actually a fox. ",
+    "platform": [
+      "She would bark"
+    ],
+    "photo_url": "images/dogs/a708f1a2-2480-4979-8cda-cb25bae5d1b6.jpg",
+    "final_rank": 29
+  },
+  {
+    "id": "2ac8a204-9e01-4864-a937-a64e35415552",
+    "name": "Goose",
+    "breed": "Pit mix",
+    "age": 2,
+    "owner": "David",
+    "street": "John St.",
+    "quote": "Loves the water hates getting wet",
+    "platform": [
+      "Bringing foxy back"
+    ],
+    "photo_url": "images/dogs/2ac8a204-9e01-4864-a937-a64e35415552.jpg",
+    "final_rank": 30
+  },
+  {
+    "id": "c51f7ab7-b112-42e4-8c3d-f0ca47f2c1cf",
+    "name": "Mavis",
+    "breed": "Mix",
+    "age": 7,
+    "owner": "K. E.",
+    "street": "Pitman",
+    "quote": "A happy pup who loves to smile",
+    "platform": [
+      "Free smiles for everyone"
+    ],
+    "photo_url": "images/dogs/c51f7ab7-b112-42e4-8c3d-f0ca47f2c1cf.jpg",
+    "final_rank": 31
+  },
+  {
+    "id": "a5673c51-954f-4ec2-87a5-f638f7fd6476",
+    "name": "Baba",
+    "breed": "Tortie ",
+    "age": 14,
+    "owner": "Carla ",
+    "street": "Wickenden St ",
+    "quote": "Will love you for life for churros",
+    "platform": [
+      "Plant flowers on every green space allowed. More benches down India also."
+    ],
+    "photo_url": "images/dogs/a5673c51-954f-4ec2-87a5-f638f7fd6476.jpg",
+    "final_rank": 32
+  },
+  {
+    "id": "1d5fd606-5c67-4169-82c2-0781843e4109",
+    "name": "Tony!",
+    "breed": "Shih Tzu-ish",
+    "age": 4,
+    "owner": "Steve",
+    "street": "John St.",
+    "quote": "The mayor of John St and Prince of Pizza Marvin",
+    "platform": [
+      "Eliminate the 4th of July fireworks ;)",
+      "Pup-sized slice at Pizza Marvin"
+    ],
+    "photo_url": "images/dogs/1d5fd606-5c67-4169-82c2-0781843e4109.jpg",
+    "final_rank": 33
+  },
+  {
+    "id": "c99d8266-5958-4088-8587-e4f960414ce7",
+    "name": "Ami",
+    "breed": "Shiba Mix",
+    "age": 3,
+    "owner": "Callie P",
+    "street": "Auburn St",
+    "quote": "The charming cryptid of the Blackstone Conservation District",
+    "platform": [
+      "Squirrel Patrol reforms"
+    ],
+    "photo_url": "images/dogs/c99d8266-5958-4088-8587-e4f960414ce7.jpg",
+    "final_rank": 34
+  },
+  {
+    "id": "a29e0f9b-3d6f-4125-b0bc-023e3e191e49",
+    "name": "My buddy Zach",
+    "breed": "DAWG",
+    "age": 29,
+    "owner": "Brown",
+    "street": "Thayer",
+    "quote": "Loves treats (zyns)",
+    "platform": [],
+    "photo_url": "images/dogs/a29e0f9b-3d6f-4125-b0bc-023e3e191e49.jpg",
+    "final_rank": 35
+  },
+  {
+    "id": "d7529da0-5adc-4be4-854f-0e3aeb7a86ef",
+    "name": "Gus",
+    "breed": "Poodle Bichon",
+    "age": 10,
+    "owner": "Mase The Ace",
+    "street": "Power Street",
+    "quote": "Sweetest little person in a fur suit. ",
+    "platform": [
+      "More pet-person quality time."
+    ],
+    "photo_url": "images/dogs/d7529da0-5adc-4be4-854f-0e3aeb7a86ef.jpg",
+    "final_rank": 36
+  },
+  {
+    "id": "cdb790b0-7872-4a01-aae6-be7e03b5ef62",
+    "name": "Fiona Apple",
+    "breed": "Australian Cattle Dog",
+    "age": 2,
+    "owner": "Liz",
+    "street": "Thayer",
+    "quote": "More cat than dog",
+    "platform": [
+      "Abolish motorcycles"
+    ],
+    "photo_url": "images/dogs/cdb790b0-7872-4a01-aae6-be7e03b5ef62.jpg",
+    "final_rank": 37
+  },
+  {
+    "id": "502eafca-7606-4e7a-8c84-57aac6b22a90",
+    "name": "Lucca AKA Beanie Bear",
+    "breed": "Chihuahua / Black Mask Cur Mix",
+    "age": 5,
+    "owner": "Heather",
+    "street": "Power Street",
+    "quote": "Strongly resembles a red fox, originally from Puerto Rico",
+    "platform": [
+      "More fox themed art in Fox Point"
+    ],
+    "photo_url": "images/dogs/502eafca-7606-4e7a-8c84-57aac6b22a90.jpg",
+    "final_rank": 38
+  },
+  {
+    "id": "672e7b4a-8c5c-40ea-894c-2179c7b4bb37",
+    "name": "Shelby",
+    "breed": "Leopard tortoise ",
+    "age": 1,
+    "owner": "Chelsea ",
+    "street": "Davies Road ",
+    "quote": "Professional climber ",
+    "platform": [],
+    "photo_url": "images/dogs/672e7b4a-8c5c-40ea-894c-2179c7b4bb37.jpg",
+    "final_rank": 39
+  },
+  {
+    "id": "5e56b2aa-b4ed-4151-8dd8-f9f69b1bbe46",
+    "name": "Gemma",
+    "breed": "Pitbull mix ",
+    "age": 5,
+    "owner": "Selin",
+    "street": "Hope Street",
+    "quote": "The sweetest girl you’ll ever meet",
+    "platform": [
+      "Provide treats for all doggies and advocate for more dog parks!"
+    ],
+    "photo_url": "images/dogs/5e56b2aa-b4ed-4151-8dd8-f9f69b1bbe46.jpg",
+    "final_rank": 40
+  },
+  {
+    "id": "b5c14189-e2ed-4a0c-a084-a58f2e6b6f0d",
+    "name": "Oreo Pancake Yaster ",
+    "breed": "Mix (cattle dog, lab, chonk)",
+    "age": 8,
+    "owner": "Marta",
+    "street": "Whitmarsh St.",
+    "quote": "She can't swim. And loves cauliflower. ",
+    "platform": [
+      "Free ground pizza for all."
+    ],
+    "photo_url": "images/dogs/b5c14189-e2ed-4a0c-a084-a58f2e6b6f0d.jpg",
+    "final_rank": 41
+  },
+  {
+    "id": "d8f158f3-bff6-4740-aa64-8600079c4082",
+    "name": "Toast ",
+    "breed": "vampire (cat)",
+    "age": 3,
+    "owner": "mk o’shaughnessy",
+    "street": "Williams St.",
+    "quote": "huge bird guy. often has stare downs with raccoons in the yard. could probably take on a fox. ",
+    "platform": [
+      "bird feeders in Roger Williams landing (free entertainment)"
+    ],
+    "photo_url": "images/dogs/d8f158f3-bff6-4740-aa64-8600079c4082.jpg",
+    "final_rank": 42
+  },
+  {
+    "id": "74ab7149-9771-4698-bc05-b75210d9a257",
+    "name": "Hazel ",
+    "breed": "Toy poodle mix",
+    "age": 5,
+    "owner": "Nick S",
+    "street": "11th St.",
+    "quote": "Professional paper/cardboard shredder. Plans to eat all the grass at lippitt park",
+    "platform": [
+      "Throw a pup party while her parents aren’t home. BYOP (bring your own peanut butter)"
+    ],
+    "photo_url": "images/dogs/74ab7149-9771-4698-bc05-b75210d9a257.jpg",
+    "final_rank": 43
+  },
+  {
+    "id": "508792ab-c0b6-4374-9e30-a72d4c622ac3",
+    "name": "Mabel",
+    "breed": "Sheep Dog",
+    "age": null,
+    "owner": "J",
+    "street": "Hope St.",
+    "quote": "Inquisitive, impulsive, mischievous, all key attributes of a fox, and proper adjectives to describe Ms. Mabes. ",
+    "platform": [
+      "Weekly squirrel and rabbit hunts",
+      "A designated patch of grass at each home for rolling/scratches",
+      "Daily meet and greets with adoring fans"
+    ],
+    "photo_url": "images/dogs/508792ab-c0b6-4374-9e30-a72d4c622ac3.jpg",
+    "final_rank": 44
+  },
+  {
+    "id": "29eebd6c-d253-4c25-b25f-b87a10d685d2",
+    "name": "Sammy McGee",
+    "breed": "Beagle",
+    "age": 6,
+    "owner": "Nick",
+    "street": "Mayflower St",
+    "quote": "She doesn’t listen, and she does judge.",
+    "platform": [
+      "More good dog stops.",
+      "More poop bags and trash bins in parks."
+    ],
+    "photo_url": "images/dogs/29eebd6c-d253-4c25-b25f-b87a10d685d2.jpg",
+    "final_rank": 45
+  },
+  {
+    "id": "4a3d80dd-e851-464d-91db-4b1338bb5fcd",
+    "name": "Soren, first of his name ",
+    "breed": "Border Collie Mix ",
+    "age": 4,
+    "owner": "T Chap ",
+    "street": "Gano Street",
+    "quote": "Dog park connoisseur, hates the leash. ",
+    "platform": [
+      "5 minute shopping spree at Central Meat Market."
+    ],
+    "photo_url": "images/dogs/4a3d80dd-e851-464d-91db-4b1338bb5fcd.jpg",
+    "final_rank": 46
+  },
+  {
+    "id": "b48bb879-0614-4187-ad68-75e96c31f909",
+    "name": "Felix",
+    "breed": "Mini Rex angora ",
+    "age": 5,
+    "owner": "David",
+    "street": "Ives St.",
+    "quote": "Cute happy little intersex man",
+    "platform": [
+      "Bananas and unlimited treats for all"
+    ],
+    "photo_url": "images/dogs/b48bb879-0614-4187-ad68-75e96c31f909.jpg",
+    "final_rank": 47
+  },
+  {
+    "id": "c0de9d5d-baac-4d55-958a-04797783046c",
+    "name": "Booberry&Pepperoncini",
+    "breed": "Cat",
+    "age": 5,
+    "owner": "Julia M",
+    "street": "Wickenden St",
+    "quote": "The dynamic duo",
+    "platform": [
+      "Legalize gentle biting"
+    ],
+    "photo_url": "images/dogs/c0de9d5d-baac-4d55-958a-04797783046c.jpg",
+    "final_rank": 48
+  },
+  {
+    "id": "1f0b825d-7684-450e-9df7-330495ac9f54",
+    "name": "Val",
+    "breed": "Lab / Pit Mix",
+    "age": 4,
+    "owner": "Zach",
+    "street": "Morris Ave",
+    "quote": "The biggest sweetheart in town, friend to all pups",
+    "platform": [
+      "Thank her agents and the team that made this possible"
+    ],
+    "photo_url": "images/dogs/1f0b825d-7684-450e-9df7-330495ac9f54.jpg",
+    "final_rank": 49
+  },
+  {
+    "id": "ee4148fd-4e6d-4f5c-9e8c-f617264bc1df",
+    "name": "Smari",
+    "breed": "Icelandic sheepdog ",
+    "age": 7,
+    "owner": "Shoshana ",
+    "street": "Knowles St ",
+    "quote": "Has been mistaken for a fox. His love language is barking. ",
+    "platform": [
+      "Race the cars coming off the Henderson Bridge",
+      "Dedicated bark time",
+      "Frisbees for all"
+    ],
+    "photo_url": "images/dogs/ee4148fd-4e6d-4f5c-9e8c-f617264bc1df.jpg",
+    "final_rank": 50
+  },
+  {
+    "id": "54f1c472-fb62-4e4f-bbd6-da845e05ca59",
+    "name": "Squash",
+    "breed": "Mutt, maybe part fox?",
+    "age": 6,
+    "owner": "Ben",
+    "street": "Transit St.",
+    "quote": "Looks like a big fox acts like a small fox",
+    "platform": [
+      "Moore Street trees for sniffing on walks",
+      "More bars without door pooch-friendly seating"
+    ],
+    "photo_url": "images/dogs/54f1c472-fb62-4e4f-bbd6-da845e05ca59.jpg",
+    "final_rank": 51
+  },
+  {
+    "id": "f9936bff-d2da-452e-ac80-9f862353b2c1",
+    "name": "Philbert",
+    "breed": "Border Collie",
+    "age": 4,
+    "owner": "Anges Flint",
+    "street": "Benefit St.",
+    "quote": "Terrified of hands",
+    "platform": [
+      "More treats",
+      "More walks",
+      "Life of luxury"
+    ],
+    "photo_url": "images/dogs/f9936bff-d2da-452e-ac80-9f862353b2c1.jpg",
+    "final_rank": 52
+  },
+  {
+    "id": "0570faaf-1e4e-4999-b41d-0b72561006ae",
+    "name": "Auggie",
+    "breed": "Havapoo",
+    "age": 3,
+    "owner": "Z. Patel",
+    "street": "East Street",
+    "quote": "Just a chill little guy ",
+    "platform": [
+      "Pup cups for all!"
+    ],
+    "photo_url": "images/dogs/0570faaf-1e4e-4999-b41d-0b72561006ae.jpg",
+    "final_rank": 53
+  },
+  {
+    "id": "9518feee-b93d-45c1-b106-27d9fc505ce1",
+    "name": "Sable",
+    "breed": "Husky",
+    "age": 2,
+    "owner": "Shania Shaw",
+    "street": "1 libby ln",
+    "quote": "sable is very energetic and loving!! she’s a little crazy but in the BEST way possible!",
+    "platform": [
+      "sable will demand all the treats! very well deserved might i add haha <3"
+    ],
+    "photo_url": "images/dogs/9518feee-b93d-45c1-b106-27d9fc505ce1.jpg",
+    "final_rank": 54
+  },
+  {
+    "id": "a38d2511-8063-47be-b586-19ab342c27fc",
+    "name": "Marley",
+    "breed": "Golden Lab",
+    "age": 4,
+    "owner": "Brianna",
+    "street": "Hunt Street ",
+    "quote": "Looks calm but is crazy ",
+    "platform": [
+      "Have a back yard bone yard"
+    ],
+    "photo_url": "images/dogs/a38d2511-8063-47be-b586-19ab342c27fc.jpg",
+    "final_rank": 55
+  },
+  {
+    "id": "541862a4-768c-4b5f-9f8b-9e1da54c3895",
+    "name": "Daisy Lou",
+    "breed": "Daschund ",
+    "age": 4,
+    "owner": "Colby",
+    "street": "Benedict rd",
+    "quote": "Sassy girl ",
+    "platform": [
+      "Lots of dog friendly parks",
+      "Water stations",
+      "Doggie group meets",
+      "Mandatory pup cups"
+    ],
+    "photo_url": "images/dogs/541862a4-768c-4b5f-9f8b-9e1da54c3895.jpg",
+    "final_rank": 56
+  },
+  {
+    "id": "cd8b7658-21df-4e54-8698-92e11dacd32f",
+    "name": "Leeann Grant",
+    "breed": "Mainecoon ",
+    "age": 1,
+    "owner": "Leeann Grant",
+    "street": "295 Osprey Rd",
+    "quote": "Looks like a cute little cuddle bug but is actually and ferocious dog when it comes to food ",
+    "platform": [
+      "Cat food for free",
+      "Free cat bio"
+    ],
+    "photo_url": "images/dogs/cd8b7658-21df-4e54-8698-92e11dacd32f.jpg",
+    "final_rank": 57
+  },
+  {
+    "id": "5b2361f7-6830-4925-b608-1a170093327b",
+    "name": "Buddy",
+    "breed": "Fox",
+    "age": 12,
+    "owner": "Buddy C",
+    "street": "Power St.",
+    "quote": "the only actual fox fit for the king of Providence",
+    "platform": [],
+    "photo_url": "images/dogs/5b2361f7-6830-4925-b608-1a170093327b.jpg",
+    "final_rank": 58
+  },
+  {
+    "id": "873f99ea-936e-4bc1-b605-39a5c90212d3",
+    "name": "Jacob",
+    "breed": "Chocolate lab",
+    "age": 2,
+    "owner": "BK",
+    "street": "76 pitman st ",
+    "quote": "Is the most perfect little angel baby in the whole wide world. Super snuggly. ",
+    "platform": [
+      "Identify as a fox"
+    ],
+    "photo_url": "images/dogs/873f99ea-936e-4bc1-b605-39a5c90212d3.jpg",
+    "final_rank": 59
+  }
+]

@@ -7,3 +7,6 @@ Thumbs.db
 .idea/
 
 .claude/settings.local.json
+
+# Private post-vote archive (raw tallies, pg_dump). Keep local / push to a private repo.
+/archive/
