@@ -3,23 +3,55 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Fox of Fox Point</title>
+  <title>The Foxes of Fox Point</title>
+  <meta name="description" content="Results from the 2026 Fox of Fox Point election — a neighborhood contest to pick one dog to wear the title for a year. See the top three, browse all 59 candidates, and help shape the 2027 contest." />
+  <link rel="canonical" href="https://foxpointfox.com/" />
+
+  <!-- Open Graph / social share previews -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://foxpointfox.com/" />
+  <meta property="og:title" content="The Foxes of Fox Point" />
+  <meta property="og:description" content="Results from the 2026 Fox of Fox Point election. See the top three, all 59 candidates, and help shape the 2027 contest." />
+  <meta property="og:image" content="https://foxpointfox.com/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Foxes of Fox Point" />
+  <meta name="twitter:description" content="Results from the 2026 Fox of Fox Point election." />
+  <meta name="twitter:image" content="https://foxpointfox.com/og-image.jpg" />
+
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
+  <!--
+    Detection-only form for Netlify Forms. Netlify scans index.html at deploy
+    time and registers any <form data-netlify="true"> it finds. The actual
+    interactive form is rendered by React in app-static.jsx with the same
+    name and field names; this hidden version exists purely so the build
+    pipeline knows the form is real.
+  -->
+  <form name="survey-2027" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+    <input type="text" name="bot-field" />
+    <input type="checkbox" name="role" value="" />
+    <input type="radio" name="duration" value="" />
+    <input type="checkbox" name="auth" value="" />
+    <input type="checkbox" name="event" value="" />
+    <input type="checkbox" name="pain" value="" />
+    <input type="email" name="email" />
+    <textarea name="comments"></textarea>
+  </form>
+
   <div id="root"></div>
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.1/dist/umd/supabase.js" integrity="sha384-pNDx8ebKKncqRMS1aZKjmB1T1jdd6psogvE0+sPrwW/Sy94M6geGuQpYXQnLCdRq" crossorigin="anonymous"></script>
-  <script src="supabase-client.js"></script>
 
-  <script src="data.js"></script>
-  <script type="text/babel" src="app.jsx?v=3"></script>
+  <script type="text/babel" src="app-static.jsx?v=20"></script>
 </body>
 </html>
